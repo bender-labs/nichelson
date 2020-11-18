@@ -1,0 +1,6 @@
+source https://api.nuget.org/v3/index.json
+
+nuget FParsec 1.1.1
+nuget FSharp.Core
+nuget FsUnit.xUnit 4.0.1
+nuget Microsoft.NET.Test.Sdk 16.7.1
