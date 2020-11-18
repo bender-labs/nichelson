@@ -9,6 +9,8 @@ type Prim =
     | T_String
     | T_Address
     | D_Pair
+    | D_Right
+    | D_Left
 
 type PrimExpression =
     { Prim: Prim
