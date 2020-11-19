@@ -22,6 +22,13 @@ module ``Parser Test`` =
 
                 expr
                 |> should equal (PrimExpression.Create Prim.T_String)
+                
+            [<Fact>]
+            let ``Should parse primitive without paren`` () =
+                let expr = parse "string"
+
+                expr
+                |> should equal (PrimExpression.Create Prim.T_String)
 
             [<Fact>]
             let ``Should parse annotation`` () =
@@ -41,7 +48,7 @@ module ``Parser Test`` =
 
             [<Fact>]
             let ``Should parse pair`` () =
-                let expr = parse "(pair (string) (nat))"
+                let expr = parse "(pair string (nat))"
 
                 let expected =
                     PrimExpression.Create

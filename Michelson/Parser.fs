@@ -10,7 +10,7 @@ let private ws = spaces
 
 let private openParen = pstring "("
 let private closingParen = pstring ")"
-    
+
 let private annotations: Parser<Annotation, UserState> =
     let start = anyOf "%!:$&?"
 
@@ -20,6 +20,15 @@ let private annotations: Parser<Annotation, UserState> =
     many
         (spaces
          >>? pipe2 start value (fun a v -> (string a) + v))
+
+let private noArg str p =
+    let v = skipString str
+
+    v >>. annotations
+    |>> (fun a ->
+        { Prim = p
+          Args = None
+          Annotations = a })
 
 let private nodeWithArgs str p (parser: Parser<Expr, UserState>) =
     let v = skipString str
@@ -39,15 +48,6 @@ module Parameters =
     let (private prims: Parser<PrimExpression, UserState>), (private primsR: Parser<PrimExpression, UserState> ref) =
         createParserForwardedToRef ()
 
-    let private noArg str p =
-        let v = skipString str
-
-        v >>. annotations
-        |>> (fun a ->
-            { Prim = p
-              Args = None
-              Annotations = a })
-
     let private tNat = noArg "nat" T_Nat
     let private tUnit = noArg "unit" T_Nat
 
@@ -61,7 +61,7 @@ module Parameters =
 
     let private tOr = paramNodeWithTwoArgs "or" T_Or
 
-    let private primChoice =
+    let private prim =
         choice [ tPair
                  tOr
                  tNat
@@ -69,11 +69,9 @@ module Parameters =
                  tString
                  tUnit ]
 
-    let private prim =
-        spaces
-        >>. between openParen closingParen primChoice
+    let private primBetweenParen = between openParen closingParen prim
 
-    do primsR := prim
+    do primsR := spaces >>? (primBetweenParen <|> prim)
 
     let parse = prims .>> eof
 
@@ -83,38 +81,35 @@ module Expression =
         createParserForwardedToRef ()
 
     let private intLiteral = pint64 |>> (Expr.Int)
-    
+
     let private stringLiteral =
-        let normalCharSnippet  = manySatisfy (fun c -> c <> '"')
-        between (pstring @"""") (pstring @"""") normalCharSnippet |>> (String)
+        let normalCharSnippet = manySatisfy (fun c -> c <> '"')
+
+        between (pstring @"""") (pstring @"""") normalCharSnippet
+        |>> (String)
 
     let private exprWithTwoArgs = nodeWithTwoArgs values
-    
-    let pairD = exprWithTwoArgs "Pair" Prim.D_Pair |>> Node
-    
-    let leftD = exprWithTwoArgs "Left" Prim.D_Left |>> Node
-    let rightD = exprWithTwoArgs "Right" Prim.D_Right |>> Node
-    
-    let private constantChoices =
-        choice [
-            pairD
-            leftD
-            rightD
-        ]
 
-    let private literalChoices =
-        choice [
-            intLiteral
-            stringLiteral
-        ]
-    let private expr =
-        spaces
-        >>? between openParen closingParen constantChoices
-    
-    let private lit =
-        spaces
-        >>? literalChoices
+    let pairD =
+        exprWithTwoArgs "Pair" Prim.D_Pair |>> Node
 
-    do valuesR := expr <|> lit
+    let leftD =
+        exprWithTwoArgs "Left" Prim.D_Left |>> Node
+
+    let rightD =
+        exprWithTwoArgs "Right" Prim.D_Right |>> Node
+
+    let private instruction =
+        choice [ intLiteral
+                 stringLiteral
+                 pairD
+                 leftD
+                 rightD ]
+
+    let private instructionBetweenParen =
+        spaces
+        >>? between openParen closingParen instruction
+
+    do valuesR := spaces >>? (instruction <|> instructionBetweenParen)
 
     let parse = values .>> eof
