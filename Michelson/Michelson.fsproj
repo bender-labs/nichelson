@@ -6,6 +6,7 @@
   <ItemGroup>
     <Compile Include="Micheline.fs" />
     <Compile Include="Parser.fs" />
+    <Compile Include="Contract.fs" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

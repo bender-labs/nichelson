@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Parser.Test.fs" />
+    <Compile Include="Contract.Test.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Michelson\Michelson.fsproj" />

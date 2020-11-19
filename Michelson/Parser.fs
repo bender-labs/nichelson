@@ -90,7 +90,7 @@ module Expression =
 
     let private exprWithTwoArgs = nodeWithTwoArgs values
 
-    let pairD =
+    let private pairD =
         exprWithTwoArgs "Pair" Prim.D_Pair |>> Node
 
     let leftD =
