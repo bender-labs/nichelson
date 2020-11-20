@@ -14,12 +14,12 @@ type Prim =
 
 type PrimExpression =
     { Prim: Prim
-      Args: Expr option
+      Args: Expr
       Annotations: Annotation }
     static member Create(p: Prim, ?args: Expr, ?annotation: Annotation) =
         { Prim = p
-          Args = args
-          Annotations = defaultArg annotation []}
+          Args = defaultArg args (Seq [])
+          Annotations = defaultArg annotation [] }
 
 and Expr =
     | Int of int64
@@ -27,3 +27,22 @@ and Expr =
     | Bytes of byte array
     | Node of PrimExpression
     | Seq of Expr list
+
+module Expr =
+    let foldNodeOrSeq fNode fSeq state expr =
+        match expr with
+        | Node n -> fNode state n
+        | Seq s -> fSeq state s
+        | _ -> state
+
+    let fold f state expr =
+        let rec folder s' expr' =
+            match expr' with
+            | Node n ->
+                let newState = f s' expr'
+                folder newState n.Args
+            | Seq s ->
+                let newState = f s' expr'
+                s |> List.fold folder newState
+            | _ -> f state expr'
+        folder state expr     

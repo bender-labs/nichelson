@@ -27,7 +27,7 @@ let private noArg str p =
     v >>. annotations
     |>> (fun a ->
         { Prim = p
-          Args = None
+          Args = Seq []
           Annotations = a })
 
 let private nodeWithArgs str p (parser: Parser<Expr, UserState>) =
@@ -36,7 +36,7 @@ let private nodeWithArgs str p (parser: Parser<Expr, UserState>) =
     v
     >>. (pipe2 annotations parser (fun annot args ->
              { Prim = p
-               Args = Some args
+               Args = args
                Annotations = annot }))
 
 let private nodeWithTwoArgs sub str p =

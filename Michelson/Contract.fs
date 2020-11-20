@@ -1,8 +1,8 @@
 namespace Bender.Michelson.Contract
 
 open System
-open System.Collections.Generic
 open Bender.Michelson.Micheline
+open FParsec
 
 (*
     (pair nat nat)
@@ -30,57 +30,60 @@ open Bender.Michelson.Micheline
     let payload = sign packed
 *)
 
-type Direction =
-    | Left
-    | Right
-
 type Path = Path of string
 
-
+module Path =
+    let value (Path p) = p
 
 type Values =
-    | Dict of Dictionary<string, Object>
+    | Map of Map<string, Object>
     | List of Object list
 
 type Find = PrimExpression -> Path -> PrimExpression
 
 type Instanciate = PrimExpression -> Path option -> Values -> Expr
 
+type ContractParameters(michelson) =
+    let typeExpression =
+        let p = run Parameters.parse michelson
+
+        match p with
+        | Success (v, _, _) -> v
+        | Failure (m, _, _) -> failwith m
+
+    let location =
+        let buildAnnotations =
+            (fun (s: Map<string, PrimExpression>) t ->
+                match t with
+                | Node v ->
+                    v.Annotations
+                    |> List.fold (fun (m: Map<string, PrimExpression>) a -> m.Add(a, v)) s
+                | _ -> s)
+
+        Expr.fold buildAnnotations Map.empty (Node typeExpression)
+
+    member this.Find(annotation) = location.[annotation]
 
 
 [<AutoOpen>]
 module Parameters =
 
-    let _pathValue (Path p) = p
-
-    let _nodeMatch (n) (Path path) =
-        if n.Annotations |> List.contains path then Some n else None
-
-    let _foldNodeOrSeq fNode fSeq expr =
-        match expr with
-        | Node n -> fNode n
-        | Seq s -> fSeq s
-        | _ -> None
-
     let find: Find =
         fun expression path ->
-            let pathStr = _pathValue path
+            let pathStr = Path.value path
 
-      
+
             let rec folder =
-                _foldNodeOrSeq (fun n ->
-                    if n.Annotations |> List.contains pathStr then
-                        Some n
-                    else
-                        match n.Args with
-                        | Some args -> folder args
-                        | None -> None)
-                    (List.fold (fun state e ->
-                        match state with
-                        | Some _ -> state
-                        | _ -> folder e) (None: Option<PrimExpression>))
+                Expr.foldNodeOrSeq
+                    (fun s n -> if n.Annotations |> List.contains pathStr then Some n else folder s n.Args)
+                    (fun s n ->
+                        n
+                        |> List.fold (fun state e ->
+                            match state with
+                            | Some _ -> state
+                            | _ -> folder s e) s)
 
 
-            match folder (Node expression) with
+            match folder None (Node expression) with
             | Some r -> r
             | None -> failwith "Not found"
