@@ -74,6 +74,13 @@ module Parameters =
     do primsR := spaces >>? (primBetweenParen <|> prim)
 
     let parse = prims .>> eof
+    
+    let fromMichelson michelson =
+        let p = run parse michelson
+
+        match p with
+        | Success (v, _, _) -> v
+        | Failure (m, _, _) -> failwith m
 
 [<RequireQualifiedAccess>]
 module Expression =

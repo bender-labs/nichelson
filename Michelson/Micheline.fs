@@ -45,4 +45,28 @@ module Expr =
                 let newState = f s' expr'
                 s |> List.fold folder newState
             | _ -> f state expr'
-        folder state expr     
+
+        folder state expr
+
+    let private orArgs (Seq ([ left; right ])) = (left, right)
+
+    let (|AnnotedOr|_|) input =
+        match input with
+        | Node v ->
+            match v.Prim with
+            | T_Or -> if v.Annotations.IsEmpty then None else Some(v, v.Args |> orArgs)
+            | _ -> None
+        | _ -> None
+
+    let (|Or|_|) input =
+        match input with
+        | Node v ->
+            match v.Prim with
+            | T_Or -> if v.Annotations.IsEmpty then Some(v, v.Args |> orArgs) else None
+            | _ -> None
+        | _ -> None
+
+    let (|AnnotedNode|_|) input =
+        match input with
+        | Node v -> if v.Annotations.IsEmpty then None else Some(v)
+        | _ -> None

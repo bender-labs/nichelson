@@ -30,3 +30,4 @@ module ``Contract test`` =
         let result = parameterType.Find("%amount")
 
         result |> should equal (parse "(nat %amount)")
+           

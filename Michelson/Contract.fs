@@ -2,7 +2,7 @@ namespace Bender.Michelson.Contract
 
 open System
 open Bender.Michelson.Micheline
-open FParsec
+open Bender.Michelson.Micheline.Expr
 
 (*
     (pair nat nat)
@@ -43,47 +43,42 @@ type Find = PrimExpression -> Path -> PrimExpression
 
 type Instanciate = PrimExpression -> Path option -> Values -> Expr
 
-type ContractParameters(michelson) =
-    let typeExpression =
-        let p = run Parameters.parse michelson
+type Entrypoint(path: Expr, name: string) =
+    member this.toParams() = ()
 
-        match p with
-        | Success (v, _, _) -> v
-        | Failure (m, _, _) -> failwith m
+type ContractParameters(typeExpression) =
+
+    let entryPoints =
+        let rec lookup (s: {| Locations : Map<string, Prim list>; Path: Prim list |})(t: Expr) :{| Locations : Map<string, Prim list>; Path: Prim list |} =
+            match t with
+            | AnnotedOr (node, (left, right)) ->
+                let updatedLocations = s.Locations.Add(node.Annotations.Head, s.Path |> List.rev)
+                let newState = lookup {|Locations = updatedLocations ; Path = D_Left :: s.Path |} left
+                lookup {| Locations = newState.Locations ; Path = D_Right :: s.Path |} right
+            | Or (_, (left,right)) ->
+                let newState = lookup {|s with Path = D_Left :: s.Path |} left
+                lookup {| Locations = newState.Locations ; Path = D_Right :: s.Path |} right
+            | AnnotedNode(node) ->
+                let updatedLocations = s.Locations.Add(node.Annotations.Head, s.Path |> List.rev)
+                {| s with Locations = updatedLocations |}
+            | _ -> s
+        
+        (lookup {|Locations = Map.empty ; Path = []|} (Node typeExpression)).Locations    
+
 
     let location =
-        let buildAnnotations =
-            (fun (s: Map<string, PrimExpression>) t ->
-                match t with
-                | Node v ->
-                    v.Annotations
-                    |> List.fold (fun (m: Map<string, PrimExpression>) a -> m.Add(a, v)) s
-                | _ -> s)
+        let buildAnnotations (s: Map<string, PrimExpression>) t =
+            match t with
+            | Node v ->
+                v.Annotations
+                |> List.fold (fun (m: Map<string, PrimExpression>) a -> m.Add(a, v)) s
+            | _ -> s
 
-        Expr.fold buildAnnotations Map.empty (Node typeExpression)
+        fold buildAnnotations Map.empty (Node typeExpression)
+
+    new(michelson) = ContractParameters(Parameters.fromMichelson michelson)
 
     member this.Find(annotation) = location.[annotation]
+    
+    member this.Path(annotation) = entryPoints.[annotation]
 
-
-[<AutoOpen>]
-module Parameters =
-
-    let find: Find =
-        fun expression path ->
-            let pathStr = Path.value path
-
-
-            let rec folder =
-                Expr.foldNodeOrSeq
-                    (fun s n -> if n.Annotations |> List.contains pathStr then Some n else folder s n.Args)
-                    (fun s n ->
-                        n
-                        |> List.fold (fun state e ->
-                            match state with
-                            | Some _ -> state
-                            | _ -> folder s e) s)
-
-
-            match folder None (Node expression) with
-            | Some r -> r
-            | None -> failwith "Not found"
