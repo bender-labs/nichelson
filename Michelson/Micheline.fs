@@ -50,7 +50,7 @@ module Expr =
 
     let private orArgs (Seq ([ left; right ])) = (left, right)
 
-    let (|AnnotedOr|_|) input =
+    let (|AnnotatedOr|_|) input =
         match input with
         | Node v ->
             match v.Prim with
@@ -66,7 +66,7 @@ module Expr =
             | _ -> None
         | _ -> None
 
-    let (|AnnotedNode|_|) input =
+    let (|AnnotatedNode|_|) input =
         match input with
         | Node v -> if v.Annotations.IsEmpty then None else Some(v)
         | _ -> None

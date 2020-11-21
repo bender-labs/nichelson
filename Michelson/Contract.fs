@@ -43,42 +43,63 @@ type Find = PrimExpression -> Path -> PrimExpression
 
 type Instanciate = PrimExpression -> Path option -> Values -> Expr
 
-type Entrypoint(path: Expr, name: string) =
-    member this.toParams() = ()
+type EntryPoint =
+    { Name: string
+      Expression: PrimExpression
+      Path: Prim list }
+
+[<RequireQualifiedAccess>]
+module EntryPoint =
+    let create name expr path =
+        { Name = name
+          Expression = expr
+          Path = path }
 
 type ContractParameters(typeExpression) =
 
     let entryPoints =
-        let rec lookup (s: {| Locations : Map<string, Prim list>; Path: Prim list |})(t: Expr) :{| Locations : Map<string, Prim list>; Path: Prim list |} =
+        let rec lookup (s: {| Locations: Map<string, EntryPoint>
+                              Path: Prim list |})
+                       (t: Expr)
+                       : {| Locations: Map<string, EntryPoint>
+                            Path: Prim list |} =
             match t with
-            | AnnotedOr (node, (left, right)) ->
-                let updatedLocations = s.Locations.Add(node.Annotations.Head, s.Path |> List.rev)
-                let newState = lookup {|Locations = updatedLocations ; Path = D_Left :: s.Path |} left
-                lookup {| Locations = newState.Locations ; Path = D_Right :: s.Path |} right
-            | Or (_, (left,right)) ->
-                let newState = lookup {|s with Path = D_Left :: s.Path |} left
-                lookup {| Locations = newState.Locations ; Path = D_Right :: s.Path |} right
-            | AnnotedNode(node) ->
-                let updatedLocations = s.Locations.Add(node.Annotations.Head, s.Path |> List.rev)
-                {| s with Locations = updatedLocations |}
+            | AnnotatedOr (node, (left, right)) ->
+                let updatedLocations =
+                    s.Locations.Add(node.Annotations.Head, EntryPoint.create node.Annotations.Head node (s.Path |> List.rev))
+
+                let newState =
+                    lookup
+                        {| Locations = updatedLocations
+                           Path = D_Left :: s.Path |}
+                        left
+
+                lookup
+                    {| Locations = newState.Locations
+                       Path = D_Right :: s.Path |}
+                    right
+            | Or (_, (left, right)) ->
+                let newState =
+                    lookup {| s with Path = D_Left :: s.Path |} left
+
+                lookup
+                    {| Locations = newState.Locations
+                       Path = D_Right :: s.Path |}
+                    right
+            | AnnotatedNode (node) ->
+                let updatedLocations =
+                    s.Locations.Add(node.Annotations.Head, EntryPoint.create node.Annotations.Head node (s.Path |> List.rev))
+
+                {| s with
+                       Locations = updatedLocations |}
             | _ -> s
-        
-        (lookup {|Locations = Map.empty ; Path = []|} (Node typeExpression)).Locations    
 
+        (lookup {| Locations = Map.empty; Path = [] |} (Node typeExpression))
+            .Locations
 
-    let location =
-        let buildAnnotations (s: Map<string, PrimExpression>) t =
-            match t with
-            | Node v ->
-                v.Annotations
-                |> List.fold (fun (m: Map<string, PrimExpression>) a -> m.Add(a, v)) s
-            | _ -> s
-
-        fold buildAnnotations Map.empty (Node typeExpression)
 
     new(michelson) = ContractParameters(Parameters.fromMichelson michelson)
 
-    member this.Find(annotation) = location.[annotation]
-    
-    member this.Path(annotation) = entryPoints.[annotation]
+    member this.Find(annotation) = entryPoints.[annotation]
 
+    member this.Path(annotation) = entryPoints.[annotation]
