@@ -41,7 +41,9 @@ let private nodeWithArgs str p (parser: Parser<Expr, UserState>) =
 
 let private nodeWithTwoArgs sub str p =
     nodeWithArgs str p (pipe2 sub sub (fun el1 el2 -> Seq [ el1; el2 ]))
-
+    
+let private nodeWithOneArg sub str p =
+    nodeWithArgs str p sub
 
 [<RequireQualifiedAccess>]
 module Parameters =
@@ -96,15 +98,16 @@ module Expression =
         |>> (String)
 
     let private exprWithTwoArgs = nodeWithTwoArgs values
+    let private exprWithOneArg = nodeWithOneArg values
 
     let private pairD =
         exprWithTwoArgs "Pair" Prim.D_Pair |>> Node
 
     let leftD =
-        exprWithTwoArgs "Left" Prim.D_Left |>> Node
+        exprWithOneArg "Left" Prim.D_Left |>> Node
 
     let rightD =
-        exprWithTwoArgs "Right" Prim.D_Right |>> Node
+        exprWithOneArg "Right" Prim.D_Right |>> Node
 
     let private instruction =
         choice [ intLiteral

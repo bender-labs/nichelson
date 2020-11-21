@@ -172,13 +172,15 @@ module ``Parser Test`` =
                    )
         [<Fact>]
         let ``Should parse Left``() =
-            let result = parse "(Left 42 43)"
+            let result = parse "(Left 42)"
             
-            result |> should equal (Expr.Node(PrimExpression.Create(Prim.D_Left, args = Seq [ Int 42L; Int 43L ])))
+            result |> should equal (Expr.Node(PrimExpression.Create(Prim.D_Left, args = Int 42L
+                                                                    
+                                                                    )))
         
         [<Fact>]
         let ``Should parse Right``() =
-            let result = parse "(Right 42 43)"
+            let result = parse "(Right 42)"
             
-            result |> should equal (Expr.Node(PrimExpression.Create(Prim.D_Right, args = Seq [ Int 42L; Int 43L ])))
+            result |> should equal (Expr.Node(PrimExpression.Create(Prim.D_Right, args =  Int 42L)))
         
