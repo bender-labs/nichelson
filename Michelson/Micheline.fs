@@ -70,3 +70,20 @@ module Expr =
         match input with
         | Node v -> if v.Annotations.IsEmpty then None else Some(v)
         | _ -> None
+
+    let (|Pair|_|) input =
+        match input with
+        | Node v ->
+            match v.Prim with
+            | T_Pair ->  Some(v, v.Args |> orArgs)
+            | _ -> None
+        | _ -> None
+        
+    let (|Primitive|_|) input =
+        match input with
+        | Node v ->
+            match v.Prim with
+            | T_String | T_Nat | T_Address ->  Some(v)
+            | _ -> None
+        | _ -> None    
+    

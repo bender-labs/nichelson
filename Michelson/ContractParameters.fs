@@ -36,12 +36,12 @@ module Path =
     let value (Path p) = p
 
 type Values =
-    | Map of Map<string, Object>
-    | List of Object list
+    | Map of Map<string, obj>
+    | List of obj list
 
 type Find = PrimExpression -> Path -> PrimExpression
 
-type Instanciate = PrimExpression -> Path option -> Values -> Expr
+type Instantiate = PrimExpression -> Path option -> Values -> Expr
 
 type EntryPoint =
     { Name: string
@@ -66,7 +66,8 @@ type ContractParameters(typeExpression) =
             match t with
             | AnnotatedOr (node, (left, right)) ->
                 let updatedLocations =
-                    s.Locations.Add(node.Annotations.Head, EntryPoint.create node.Annotations.Head node (s.Path |> List.rev))
+                    s.Locations.Add
+                        (node.Annotations.Head, EntryPoint.create node.Annotations.Head node (s.Path |> List.rev))
 
                 let newState =
                     lookup
@@ -88,7 +89,8 @@ type ContractParameters(typeExpression) =
                     right
             | AnnotatedNode (node) ->
                 let updatedLocations =
-                    s.Locations.Add(node.Annotations.Head, EntryPoint.create node.Annotations.Head node (s.Path |> List.rev))
+                    s.Locations.Add
+                        (node.Annotations.Head, EntryPoint.create node.Annotations.Head node (s.Path |> List.rev))
 
                 {| s with
                        Locations = updatedLocations |}
@@ -102,4 +104,37 @@ type ContractParameters(typeExpression) =
 
     member this.Find(annotation) = entryPoints.[annotation]
 
-    member this.Path(annotation) = entryPoints.[annotation]
+    member this.Only(annotation) =
+        ContractParameters(this.Find(annotation).Expression)
+
+    member this.Instantiate(entryPoint, values: Values) =
+        let ep = this.Find(entryPoint)
+
+        let instantiate prim (v: obj) =
+            match prim, v with
+            | T_String, (:? string as s) -> String s
+            | T_Nat, (:? Int64 as i) -> Int i
+            | T_Address, (:? string as s) -> String s
+            | _, _ -> failwith "Bad parameters"
+
+        let consume (expr: PrimExpression) (values: Values) =
+            match expr.Annotations, values with
+            | [ name ], Map (m) -> (instantiate expr.Prim m.[name], Map(m.Remove(name)))
+            | _, List (head :: tail) -> (instantiate expr.Prim head, List tail)
+            | _ -> failwith "Bad arguments"
+
+        let rec loop (expr: Expr) v =
+            match expr with
+            | Pair (_, (left, right)) ->
+                let (leftValue, next) = loop left v
+                let (rightValue, next) = loop right next
+
+                let p =
+                    PrimExpression.Create(D_Pair, args = Seq [ leftValue; rightValue ])
+
+                (Node p, next)
+            | Primitive (n) -> consume n v
+            | _ -> failwith "Bad parameter type"
+
+        let (expr, _) = loop (Node ep.Expression) values
+        List.foldBack (fun p e -> Node (PrimExpression.Create(p, args = e))) ep.Path expr
