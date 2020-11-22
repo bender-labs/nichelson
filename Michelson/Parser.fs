@@ -1,7 +1,6 @@
 [<AutoOpen>]
-module Bender.Michelson.Micheline.Parser
+module Bender.Michelson.Parser
 
-open Bender.Michelson.Micheline
 open FParsec
 
 type private UserState = unit
@@ -89,7 +88,7 @@ module Expression =
     let (private values: Parser<Expr, UserState>), (private valuesR: Parser<Expr, UserState> ref) =
         createParserForwardedToRef ()
 
-    let private intLiteral = pint64 |>> (Expr.Int)
+    let private intLiteral = pint64 |>> (Int)
 
     let private stringLiteral =
         let normalCharSnippet = manySatisfy (fun c -> c <> '"')

@@ -5,13 +5,12 @@ module Bender.Michelson.Encoder
 open System
 open System.Collections.Generic
 open System.Text
-open Bender.Michelson.Micheline
 
-let private primTags = [
-                          (D_Left, 0x05uy)
-                          (D_Pair, 0x07uy)
-                          (D_Right, 0x08uy)
-                          ] |> Map.ofList
+let private primTags =
+    [ (D_Left, 0x05uy)
+      (D_Pair, 0x07uy)
+      (D_Right, 0x08uy) ]
+    |> Map.ofList
 
 let private lenTags =
     [ [ (false, 3uy); (true, 4uy) ] |> Map.ofList
@@ -22,34 +21,37 @@ let private lenTags =
 let private toLittleEndian b =
     if (BitConverter.IsLittleEndian) then b |> Array.rev else b
 
-let private forgeInt (value:int64) = 
-        
+let private forgeInt (value: int64) =
+
     let mutable binary = Convert.ToString(Math.Abs(value), 2)
 
-    let mutable pad = 6;
-    if ((binary.Length - 6) % 7 = 0) then
-        pad <- binary.Length
-    else if (binary.Length > 6) then
-        pad <- binary.Length + 7 - (binary.Length - 6) % 7
+    let mutable pad = 6
+
+    if ((binary.Length - 6) % 7 = 0) then pad <- binary.Length
+    else if (binary.Length > 6) then pad <- binary.Length + 7 - (binary.Length - 6) % 7
 
     binary <- binary.PadLeft(pad, '0')
 
-    let septets =  List<string>()
+    let septets = List<string>()
 
     for i in 0 .. (pad / 7) do
         septets.Add(binary.Substring(7 * i, Math.Min(7, pad - 7 * i)))
 
-    septets.Reverse();
-
+    septets.Reverse()
     septets.[0] <- (if value >= 0L then "0" else "1") + septets.[0]
 
-    let mutable res: byte[] = [||]
+    let mutable res: byte [] = [||]
 
-    for i in 0 .. (septets.Count-1) do
-        let prefix = if i = septets.Count - 1 then "0" else "1"
-        res <- Array.concat [res ; [| Convert.ToByte(prefix + septets.[i], 2)|] ]
+    for i in 0 .. (septets.Count - 1) do
+        let prefix =
+            if i = septets.Count - 1 then "0" else "1"
+
+        res <-
+            Array.concat [ res
+                           [| Convert.ToByte(prefix + septets.[i], 2) |] ]
+
     res
-        
+
 
 let private encodeInt (v: int64) =
     match v with
@@ -75,11 +77,11 @@ let private encodePrim (acc: List<byte>) (v: PrimExpression) (loop: List<byte> -
         acc.Add(lenTags.[args.Length].[false])
         acc.Add(primTags.[v.Prim])
         args |> List.fold loop acc
-    | _ as c , [] ->
+    | c, [] ->
         acc.Add(lenTags.[1].[false])
         acc.Add(primTags.[v.Prim])
         loop acc c
-    | _, _ -> failwith "Not supported"        
+    | _, _ -> failwith "Not supported"
 
 
 
@@ -91,21 +93,25 @@ let pack (expr: Expr) =
         match v with
         | Node p -> encodePrim acc p loop
         | Int i ->
-            res.Add(0x00uy);
+            res.Add(0x00uy)
             res.AddRange(forgeInt i)
             acc
         | String s ->
             res.Add(0x01uy)
             res.AddRange(encodeString s)
             acc
-        | _ -> failwith "Bad expression"
+        | Bytes b ->
+            res.Add(0x0Auy)
+            res.AddRange(encodeArray b)
+            acc
+        | _ as t -> failwith (sprintf "Unsupported %s" (t.ToString()))
 
     (loop res expr).ToArray()
 
 let byteToHex bytes =
     let v =
         bytes
-        |> Array.map (fun (x: byte) -> System.String.Format("{0:x2}", x))
-        |> String.concat System.String.Empty
+        |> Array.map (fun (x: byte) -> String.Format("{0:x2}", x))
+        |> String.concat String.Empty
 
     "0x" + v

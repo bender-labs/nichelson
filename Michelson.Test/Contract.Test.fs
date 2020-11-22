@@ -1,10 +1,10 @@
 namespace Michelson.Test
 
+open Bender.Michelson
 open Bender.Michelson.Contract
 
 module ``Contract test`` =
 
-    open Bender.Michelson.Micheline
     open Xunit
     open FsUnit.Xunit
 
@@ -98,3 +98,4 @@ module ``Contract test`` =
 
         expression
         |> should equal (Expression.fromMichelson (@"(Left (Pair 10 ""id""))"))
+        

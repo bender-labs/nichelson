@@ -1,6 +1,5 @@
 namespace Michelson.Test
 
-open System.Text
 open Bender.Michelson.Contract
 
 module ``End to end`` =
@@ -30,7 +29,7 @@ module ``End to end`` =
         let params =
             parameterType
                 .Only("%mint")
-                .Instantiate("%mint",
+                .Instantiate(
                              List [ 10L
                                     "tz1exrEuATYhFmVSXhkCkkFzY72T75hpsthj"
                                     "ethContract"
@@ -40,4 +39,4 @@ module ``End to end`` =
         (Encoder.byteToHex encoded)
         |> should
             equal
-               "0x0507070707000a0100000024747a31657872457541545968466d565358686b436b6b467a59373254373568707374686a0707010000000b657468436f6e7472616374010000000765746854784964"
+               "0x0507070707000a0a000000160000d3f99177aa262227a65b344416f85de34bf214200707010000000b657468436f6e7472616374010000000765746854784964"

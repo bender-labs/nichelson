@@ -1,4 +1,4 @@
-namespace Bender.Michelson.Micheline
+namespace Bender.Michelson
 
 type Annotation = string list
 

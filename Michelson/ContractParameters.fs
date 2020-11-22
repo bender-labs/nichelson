@@ -1,8 +1,6 @@
 namespace Bender.Michelson.Contract
-
+open Bender.Michelson
 open System
-open Bender.Michelson.Micheline
-open Bender.Michelson.Micheline.Expr
 
 (*
     (pair nat nat)
@@ -99,23 +97,14 @@ type ContractParameters(typeExpression) =
         (lookup {| Locations = Map.empty; Path = [] |} (Node typeExpression))
             .Locations
 
-
-    new(michelson) = ContractParameters(Parameters.fromMichelson michelson)
-
-    member this.Find(annotation) = entryPoints.[annotation]
-
-    member this.Only(annotation) =
-        ContractParameters(this.Find(annotation).Expression)
-
-    member this.Instantiate(entryPoint, values: Values) =
-        let ep = this.Find(entryPoint)
-
+    let instantiate t values =
         let instantiate prim (v: obj) =
             match prim, v with
-            | T_String, (:? string as s) -> String s
+            | T_String, (:? string as s) -> Expr.String s
             | T_Nat, (:? Int64 as i) -> Int i
-            | T_Address, (:? string as s) -> String s
-            | _, _ -> failwith "Bad parameters"
+            | T_Address, (:? string as s) -> Bytes (TezosAddress.FromString s |> TezosAddress.ToBase58)
+            | T_Address, (:? TezosAddress.T as addr) -> Bytes (addr |> TezosAddress.ToBase58)
+            | _ as t, _ as arg -> failwith (sprintf "Bad parameters. %s does not match with %s" (t.ToString()) (arg.ToString()))
 
         let consume (expr: PrimExpression) (values: Values) =
             match expr.Annotations, values with
@@ -136,5 +125,20 @@ type ContractParameters(typeExpression) =
             | Primitive (n) -> consume n v
             | _ -> failwith "Bad parameter type"
 
-        let (expr, _) = loop (Node ep.Expression) values
-        List.foldBack (fun p e -> Node(PrimExpression.Create(p, args = e))) ep.Path expr
+        let (expr, _) = loop (Node t) values
+        expr
+
+    new(michelson) = ContractParameters(Parameters.fromMichelson michelson)
+
+    member this.Find(annotation) = entryPoints.[annotation]
+
+    member this.Only(annotation) =
+        ContractParameters(this.Find(annotation).Expression)
+
+    member this.Instantiate(entryPoint, values: Values) =
+        let ep = this.Find(entryPoint)
+        let result = instantiate ep.Expression values
+        List.foldBack (fun p e -> Node(PrimExpression.Create(p, args = e))) ep.Path result
+
+    member this.Instantiate(values: Values) =
+        instantiate typeExpression values

@@ -1,12 +1,11 @@
 namespace Michelson.Test
 
-open Bender.Michelson.Micheline.Parser
+open Bender.Michelson
 
 module ``Encoder test`` =
     
     open FsUnit.Xunit
     open Xunit
-    open Bender.Michelson
     
     let pack v = Encoder.pack (Expression.fromMichelson v)
     

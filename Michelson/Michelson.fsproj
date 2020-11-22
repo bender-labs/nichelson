@@ -4,8 +4,9 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Micheline.fs" />
+    <Compile Include="Michelson.fs" />
     <Compile Include="Parser.fs" />
+    <Compile Include="TezosAddress.fs" />
     <Compile Include="ContractParameters.fs" />
     <Compile Include="Encoder.fs" />
   </ItemGroup>
