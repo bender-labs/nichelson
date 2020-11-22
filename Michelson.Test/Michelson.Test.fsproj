@@ -7,6 +7,7 @@
     <Compile Include="Parser.Test.fs" />
     <Compile Include="Contract.Test.fs" />
     <Compile Include="Encoder.Test.fs" />
+    <Compile Include="EndToEnd.Test.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Michelson\Michelson.fsproj" />

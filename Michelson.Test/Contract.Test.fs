@@ -7,8 +7,6 @@ module ``Contract test`` =
     open Bender.Michelson.Micheline
     open Xunit
     open FsUnit.Xunit
-    open FParsec
-
 
     [<Fact>]
     let ``Should find by annotation`` () =
@@ -28,30 +26,6 @@ module ``Contract test`` =
 
         result.Expression
         |> should equal (Parameters.fromMichelson "(nat %amount)")
-
-    [<Fact>]
-    let ``real case`` () =
-        let parameterType =
-            ContractParameters "(or (or (or (or %assets_admin (unit %change_tokens_administrator) (unit %pause_token))
-                (pair %burn (pair (nat %amount) (string %destination)) (string %token_id)))
-            (or (or %contract_admin
-                   (or (address %set_administrator) (address %set_governance))
-                   (address %set_signer))
-                (or %governance
-                   (or (pair %add_token
-                          (pair (pair (nat %decimals) (string %eth_contract))
-                                (pair (string %eth_symbol) (string %name)))
-                          (string %symbol))
-                       (string %remove_token))
-                   (nat %set_fees_ratio))))
-        (pair %mint
-           (pair (nat %amount) (address %owner))
-           (pair (string %token_id) (string %tx_id))))"
-
-        let result = parameterType.Find "%remove_token"
-
-        result.Expression
-        |> should equal (Parameters.fromMichelson "string %remove_token")
 
     [<Fact>]
     let ``Should extract sub contract`` () =

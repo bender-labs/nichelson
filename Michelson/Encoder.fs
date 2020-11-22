@@ -22,6 +22,35 @@ let private lenTags =
 let private toLittleEndian b =
     if (BitConverter.IsLittleEndian) then b |> Array.rev else b
 
+let private forgeInt (value:int64) = 
+        
+    let mutable binary = Convert.ToString(Math.Abs(value), 2)
+
+    let mutable pad = 6;
+    if ((binary.Length - 6) % 7 = 0) then
+        pad <- binary.Length
+    else if (binary.Length > 6) then
+        pad <- binary.Length + 7 - (binary.Length - 6) % 7
+
+    binary <- binary.PadLeft(pad, '0')
+
+    let septets =  List<string>()
+
+    for i in 0 .. (pad / 7) do
+        septets.Add(binary.Substring(7 * i, Math.Min(7, pad - 7 * i)))
+
+    septets.Reverse();
+
+    septets.[0] <- (if value >= 0L then "0" else "1") + septets.[0]
+
+    let mutable res: byte[] = [||]
+
+    for i in 0 .. (septets.Count-1) do
+        let prefix = if i = septets.Count - 1 then "0" else "1"
+        res <- Array.concat [res ; [| Convert.ToByte(prefix + septets.[i], 2)|] ]
+    res
+        
+
 let private encodeInt (v: int64) =
     match v with
     | _ when (v <= int64 (Int16.MaxValue)) -> BitConverter.GetBytes(int16 (v)) |> toLittleEndian
@@ -62,7 +91,8 @@ let pack (expr: Expr) =
         match v with
         | Node p -> encodePrim acc p loop
         | Int i ->
-            res.AddRange(encodeInt i)
+            res.Add(0x00uy);
+            res.AddRange(forgeInt i)
             acc
         | String s ->
             res.Add(0x01uy)
