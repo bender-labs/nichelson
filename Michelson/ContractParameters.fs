@@ -137,4 +137,4 @@ type ContractParameters(typeExpression) =
             | _ -> failwith "Bad parameter type"
 
         let (expr, _) = loop (Node ep.Expression) values
-        List.foldBack (fun p e -> Node (PrimExpression.Create(p, args = e))) ep.Path expr
+        List.foldBack (fun p e -> Node(PrimExpression.Create(p, args = e))) ep.Path expr

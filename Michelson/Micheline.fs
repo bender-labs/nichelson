@@ -28,6 +28,7 @@ and Expr =
     | Node of PrimExpression
     | Seq of Expr list
 
+[<AutoOpen>]
 module Expr =
     let foldNodeOrSeq fNode fSeq state expr =
         match expr with
@@ -87,3 +88,9 @@ module Expr =
             | _ -> None
         | _ -> None    
     
+    let (|IntLiteral|_|) input = 
+        match input with
+            | Int i  -> Some i
+            | _ -> None
+            
+        

@@ -7,6 +7,7 @@
     <Compile Include="Micheline.fs" />
     <Compile Include="Parser.fs" />
     <Compile Include="ContractParameters.fs" />
+    <Compile Include="Encoder.fs" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>
