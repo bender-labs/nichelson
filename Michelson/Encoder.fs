@@ -23,12 +23,13 @@ let private toLittleEndian b =
 
 let private forgeInt (value: int64) =
 
+
     let mutable binary = Convert.ToString(Math.Abs(value), 2)
 
-    let mutable pad = 6
-
-    if ((binary.Length - 6) % 7 = 0) then pad <- binary.Length
-    else if (binary.Length > 6) then pad <- binary.Length + 7 - (binary.Length - 6) % 7
+    let pad =
+        if ((binary.Length - 6) % 7 = 0) then binary.Length
+        else if (binary.Length > 6) then binary.Length + 7 - (binary.Length - 6) % 7
+        else 6
 
     binary <- binary.PadLeft(pad, '0')
 
@@ -40,17 +41,15 @@ let private forgeInt (value: int64) =
     septets.Reverse()
     septets.[0] <- (if value >= 0L then "0" else "1") + septets.[0]
 
-    let mutable res: byte [] = [||]
+    let res = List<byte>()
 
     for i in 0 .. (septets.Count - 1) do
         let prefix =
             if i = septets.Count - 1 then "0" else "1"
 
-        res <-
-            Array.concat [ res
-                           [| Convert.ToByte(prefix + septets.[i], 2) |] ]
+        res.Add(Convert.ToByte(prefix + septets.[i], 2))
 
-    res
+    res.ToArray()
 
 
 let private encodeInt (v: int64) =
@@ -104,7 +103,7 @@ let pack (expr: Expr) =
             res.Add(0x0Auy)
             res.AddRange(encodeArray b)
             acc
-        | _ as t -> failwith (sprintf "Unsupported %s" (t.ToString()))
+        | t -> failwith (sprintf "Unsupported %s" (t.ToString()))
 
     (loop res expr).ToArray()
 

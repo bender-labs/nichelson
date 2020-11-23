@@ -31,7 +31,7 @@ module ``End to end`` =
                 .Only("%mint")
                 .Instantiate(
                              List [ 10L
-                                    "tz1exrEuATYhFmVSXhkCkkFzY72T75hpsthj"
+                                    "tz1exrEuATYhFmVSXhkCkkFzY72T75hpsthj%mint"
                                     "ethContract"
                                     "ethTxId" ])
         let encoded = Encoder.pack params
@@ -39,4 +39,4 @@ module ``End to end`` =
         (Encoder.byteToHex encoded)
         |> should
             equal
-               "0x0507070707000a0a000000160000d3f99177aa262227a65b344416f85de34bf214200707010000000b657468436f6e7472616374010000000765746854784964"
+               "0x0507070707000a0a0000001a0000d3f99177aa262227a65b344416f85de34bf214206d696e740707010000000b657468436f6e7472616374010000000765746854784964"

@@ -17,6 +17,15 @@ module ``Address test`` =
         |> should
             equal
                ({ Type = TZ1
-                  Value = "tz1exrEuATYhFmVSXhkCkkFzY72T75hpsthj" }: TezosAddress.T)
-        let base58 = v |> TezosAddress.ToBase58 |> BitConverter.ToString
-        base58.ToLower() |> should equal "00-00-d3-f9-91-77-aa-26-22-27-a6-5b-34-44-16-f8-5d-e3-4b-f2-14-20"
+                  Value = "tz1exrEuATYhFmVSXhkCkkFzY72T75hpsthj"
+                  EntryPoint = None }: TezosAddress.T)
+        let base58 = v |> TezosAddress.ToBase58 |> Encoder.byteToHex
+        base58.ToLower() |> should equal "0x0000d3f99177aa262227a65b344416f85de34bf21420"
+        
+    [<Fact>]
+    let ``Should include ep``() =
+        let v =
+            TezosAddress.FromString "tz1exrEuATYhFmVSXhkCkkFzY72T75hpsthj%mint"
+        let base58 = v |> TezosAddress.ToBase58 |> Encoder.byteToHex
+        base58.ToLower() |> should equal "0x0000d3f99177aa262227a65b344416f85de34bf214206d696e74"
+
