@@ -9,6 +9,7 @@
     <Compile Include="Encoder.Test.fs" />
     <Compile Include="EndToEnd.Test.fs" />
     <Compile Include="Address.Test.fs" />
+    <Compile Include="Signature.Test.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Michelson\Michelson.fsproj" />

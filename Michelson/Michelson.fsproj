@@ -5,10 +5,11 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Michelson.fs" />
+    <Compile Include="Encoder.fs" />
     <Compile Include="Parser.fs" />
     <Compile Include="TezosAddress.fs" />
+    <Compile Include="Signature.fs" />
     <Compile Include="ContractParameters.fs" />
-    <Compile Include="Encoder.fs" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

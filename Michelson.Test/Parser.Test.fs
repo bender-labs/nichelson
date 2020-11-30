@@ -43,6 +43,12 @@ module ``Parser Test`` =
 
                 expr
                 |> should equal (PrimExpression.Create(Prim.T_String, annotation = [ "%token_id"; "%other" ]))
+                
+            [<Fact>]
+            let ``Should parse signature`` () =
+                let expr = parse "signature"
+                
+                expr |> should equal (PrimExpression.Create T_Signature)
 
         type Pair() =
 
@@ -130,6 +136,15 @@ module ``Parser Test`` =
 
                 let result = parse expr
                 result |> should not' (equal null)
+                
+        type List() =
+            [<Fact>]
+            let ``Should pare list``() =
+                let expr = parse "(list nat)"
+                
+                let expected = PrimExpression.Create (T_List, args = Node (PrimExpression.Create T_Nat))
+                
+                expr |> should equal expected
 
     module ``Expression parser test`` =
         let parse str =
@@ -177,10 +192,14 @@ module ``Parser Test`` =
             result |> should equal (Expr.Node(PrimExpression.Create(Prim.D_Left, args = Int 42L
                                                                     
                                                                     )))
-        
         [<Fact>]
         let ``Should parse Right``() =
             let result = parse "(Right 42)"
             
             result |> should equal (Expr.Node(PrimExpression.Create(Prim.D_Right, args =  Int 42L)))
         
+        [<Fact>]
+        let ``Should parse binary``() =
+            let result = parse "0x050a000000160000d3f99177aa262227a65b344416f85de34bf21420"
+            
+            result |> should equal (Expr.Bytes (Encoder.hexToBytes "0x050a000000160000d3f99177aa262227a65b344416f85de34bf21420")) 

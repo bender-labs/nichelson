@@ -108,9 +108,17 @@ let pack (expr: Expr) =
     (loop res expr).ToArray()
 
 let byteToHex bytes =
-    let v =
-        bytes
-        |> Array.map (fun (x: byte) -> String.Format("{0:x2}", x))
-        |> String.concat String.Empty
+    bytes
+    |> Array.map (fun (x: byte) -> String.Format("{0:x2}", x))
+    |> String.concat String.Empty
+    |> (fun s -> "0x" + s)
 
-    "0x" + v
+
+let hexToBytes str =
+    str
+    |> Seq.skip 2
+    |> Seq.windowed 2
+    |> Seq.mapi (fun i j -> (i, j))
+    |> Seq.filter (fun (i, j) -> i % 2 = 0)
+    |> Seq.map (fun (_, j) -> Byte.Parse(new System.String(j), System.Globalization.NumberStyles.AllowHexSpecifier))
+    |> Array.ofSeq

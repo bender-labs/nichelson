@@ -8,6 +8,8 @@ type Prim =
     | T_Pair
     | T_String
     | T_Address
+    | T_Signature
+    | T_List
     | D_Pair
     | D_Right
     | D_Left
@@ -84,7 +86,7 @@ module Expr =
         match input with
         | Node v ->
             match v.Prim with
-            | T_String | T_Nat | T_Address ->  Some(v)
+            | T_String | T_Nat | T_Address | T_Signature ->  Some(v)
             | _ -> None
         | _ -> None    
     

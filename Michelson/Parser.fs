@@ -2,6 +2,7 @@
 module Bender.Michelson.Parser
 
 open FParsec
+open Bender.Michelson
 
 type private UserState = unit
 
@@ -40,9 +41,8 @@ let private nodeWithArgs str p (parser: Parser<Expr, UserState>) =
 
 let private nodeWithTwoArgs sub str p =
     nodeWithArgs str p (pipe2 sub sub (fun el1 el2 -> Seq [ el1; el2 ]))
-    
-let private nodeWithOneArg sub str p =
-    nodeWithArgs str p sub
+
+let private nodeWithOneArg sub str p = nodeWithArgs str p sub
 
 [<RequireQualifiedAccess>]
 module Parameters =
@@ -55,8 +55,13 @@ module Parameters =
     let private tAddress = noArg "address" T_Address
 
     let private tString = noArg "string" T_String
+    
+    let private tSignature = noArg "signature" T_Signature
 
-    let paramNodeWithTwoArgs = nodeWithTwoArgs (prims |>> (Node))
+    let private tList =
+        nodeWithOneArg (prims |>> Node) "list" T_List
+
+    let paramNodeWithTwoArgs = nodeWithTwoArgs (prims |>> Node)
 
     let private tPair = paramNodeWithTwoArgs "pair" T_Pair
 
@@ -64,10 +69,12 @@ module Parameters =
 
     let private prim =
         choice [ tPair
+                 tList
                  tOr
                  tNat
                  tAddress
                  tString
+                 tSignature
                  tUnit ]
 
     let private primBetweenParen = between openParen closingParen prim
@@ -75,7 +82,7 @@ module Parameters =
     do primsR := spaces >>? (primBetweenParen <|> prim)
 
     let parse = prims .>> eof
-    
+
     let fromMichelson michelson =
         let p = run parse michelson
 
@@ -96,6 +103,11 @@ module Expression =
         between (pstring @"""") (pstring @"""") normalCharSnippet
         |>> (String)
 
+    let private hexLiteral =
+        let start = pstring "0x"
+        let hex = manySatisfy isHex
+        pipe2 start hex (fun s n -> s + n |> Encoder.hexToBytes |> Bytes)
+
     let private exprWithTwoArgs = nodeWithTwoArgs values
     let private exprWithOneArg = nodeWithOneArg values
 
@@ -109,7 +121,8 @@ module Expression =
         exprWithOneArg "Right" Prim.D_Right |>> Node
 
     let private instruction =
-        choice [ intLiteral
+        choice [ hexLiteral
+                 intLiteral
                  stringLiteral
                  pairD
                  leftD
@@ -119,10 +132,12 @@ module Expression =
         spaces
         >>? between openParen closingParen instruction
 
-    do valuesR := spaces >>? (instruction <|> instructionBetweenParen)
+    do valuesR
+       := spaces
+          >>? (instruction <|> instructionBetweenParen)
 
     let parse = values .>> eof
-    
+
     let fromMichelson michelson =
         let p = run parse michelson
 

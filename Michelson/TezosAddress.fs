@@ -65,7 +65,7 @@ module TezosAddress =
 
     let Value (addr: T) = prefixAsString.[addr.Type] + addr.Value
 
-    let ToBase58 (addr: T) =
+    let ToBytes (addr: T) =
         let full = Base58.Parse(addr.Value)
         let prefix = base58Tags.[addr.Type]
         let withoutPrefix = Array.zeroCreate (full.Length - 3)

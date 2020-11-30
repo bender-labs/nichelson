@@ -1,4 +1,5 @@
 namespace Bender.Michelson.Contract
+
 open Bender.Michelson
 open System
 
@@ -102,9 +103,15 @@ type ContractParameters(typeExpression) =
             match prim, v with
             | T_String, (:? string as s) -> Expr.String s
             | T_Nat, (:? Int64 as i) -> Int i
-            | T_Address, (:? string as s) -> Bytes (TezosAddress.FromString s |> TezosAddress.ToBase58)
-            | T_Address, (:? TezosAddress.T as addr) -> Bytes (addr |> TezosAddress.ToBase58)
-            | _ as t, _ as arg -> failwith (sprintf "Bad parameters. %s does not match with %s" (t.ToString()) (arg.ToString()))
+            | T_Address, (:? string as s) ->
+                Bytes
+                    (s
+                     |> TezosAddress.FromString
+                     |> TezosAddress.ToBytes)
+            | T_Address, (:? TezosAddress.T as addr) -> Bytes(addr |> TezosAddress.ToBytes)
+            | T_Signature, (:? string as s) -> Bytes(s |> Signature.FromString |> Signature.ToBytes)
+            | t, _ as arg ->
+                failwith (sprintf "Bad parameters. %s does not match with %s" (t.ToString()) (arg.ToString()))
 
         let consume (expr: PrimExpression) (values: Values) =
             match expr.Annotations, values with
@@ -123,7 +130,7 @@ type ContractParameters(typeExpression) =
 
                 (Node p, next)
             | Primitive (n) -> consume n v
-            | _ -> failwith "Bad parameter type"
+            | _ -> failwith (sprintf "Bad parameter type. %s" (expr.ToString()))
 
         let (expr, _) = loop (Node t) values
         expr
@@ -140,5 +147,4 @@ type ContractParameters(typeExpression) =
         let result = instantiate ep.Expression values
         List.foldBack (fun p e -> Node(PrimExpression.Create(p, args = e))) ep.Path result
 
-    member this.Instantiate(values: Values) =
-        instantiate typeExpression values
+    member this.Instantiate(values: Values) = instantiate typeExpression values
