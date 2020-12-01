@@ -26,15 +26,15 @@ module ``End to end`` =
         (pair %mint (pair (nat %amount) (address %owner))
            (pair (string %token_id) (string %tx_id))))"
 
-        let params =
+        let parameters =
             parameterType
                 .Only("%mint")
-                .Instantiate(
-                             List [ 10L
-                                    "tz1exrEuATYhFmVSXhkCkkFzY72T75hpsthj%mint"
-                                    "ethContract"
-                                    "ethTxId" ])
-        let encoded = Encoder.pack params
+                .Instantiate(Unnamed [ 10L
+                                       "tz1exrEuATYhFmVSXhkCkkFzY72T75hpsthj%mint"
+                                       "ethContract"
+                                       "ethTxId" ])
+
+        let encoded = Encoder.pack parameters
 
         (Encoder.byteToHex encoded)
         |> should
@@ -42,8 +42,9 @@ module ``End to end`` =
                "0x0507070707000a0a0000001a0000d3f99177aa262227a65b344416f85de34bf214206d696e740707010000000b657468436f6e7472616374010000000765746854784964"
 
     [<Fact>]
-    let ``multisig``() =
-        let parameterType = ContractParameters"(pair (pair (or %action
+    let multisig () =
+        let parameterType =
+            ContractParameters "(pair (pair (or %action
                    (unit %change_keys)
                    (pair %signer_operation
                       (pair %action
@@ -52,5 +53,17 @@ module ``End to end`` =
                       (address %target)))
                 (nat %counter))
           (list %signatures (pair string signature)))"
-          
+
+        let r =
+            parameterType.Instantiate
+                (Unnamed [ Or.Right
+                           100L
+                           "tz1exrEuATYhFmVSXhkCkkFzY72T75hpsthj"
+                           "tokenId"
+                           "txId"
+                           "KT1MUrrpFyjy8tu3udaRk74uA1Je7q6iftTZ"
+                           4L
+                           [ [ "id"
+                               "edsigtfKWaNLGaSC4kdXitkgS9rrcniWdR2NTuUJG8ubVXKLMyi8ZUvem2A38CXZaYdfBbSxY1gEHLkoqHZ9EBunHSq1zZz9t11" ] ] ])
+
         parameterType |> should not' (equal null)

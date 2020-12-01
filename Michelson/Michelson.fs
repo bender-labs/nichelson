@@ -65,7 +65,7 @@ module Expr =
         match input with
         | Node v ->
             match v.Prim with
-            | T_Or -> if v.Annotations.IsEmpty then Some(v, v.Args |> orArgs) else None
+            | T_Or -> Some(v, v.Args |> orArgs)
             | _ -> None
         | _ -> None
 

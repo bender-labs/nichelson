@@ -29,18 +29,13 @@ open System
     let payload = sign packed
 *)
 
-type Path = Path of string
-
-module Path =
-    let value (Path p) = p
-
 type Values =
-    | Map of Map<string, obj>
-    | List of obj list
+    | Named of Map<string, obj>
+    | Unnamed of obj list
 
-type Find = PrimExpression -> Path -> PrimExpression
-
-type Instantiate = PrimExpression -> Path option -> Values -> Expr
+type Or =
+    | Left = 0
+    | Right = 1
 
 type EntryPoint =
     { Name: string
@@ -48,7 +43,7 @@ type EntryPoint =
       Path: Prim list }
 
 [<RequireQualifiedAccess>]
-module EntryPoint =
+module private EntryPoint =
     let create name expr path =
         { Name = name
           Expression = expr
@@ -110,15 +105,17 @@ type ContractParameters(typeExpression) =
                      |> TezosAddress.ToBytes)
             | T_Address, (:? TezosAddress.T as addr) -> Bytes(addr |> TezosAddress.ToBytes)
             | T_Signature, (:? string as s) -> Bytes(s |> Signature.FromString |> Signature.ToBytes)
+            | T_Signature, (:? Signature.T as s) -> Bytes(s |> Signature.ToBytes)
             | t, _ as arg ->
                 failwith (sprintf "Bad parameters. %s does not match with %s" (t.ToString()) (arg.ToString()))
 
         let consume (expr: PrimExpression) (values: Values) =
             match expr.Annotations, values with
-            | [ name ], Map (m) -> (instantiate expr.Prim m.[name], Map(m.Remove(name)))
-            | _, List (head :: tail) -> (instantiate expr.Prim head, List tail)
+            | [ name ], Named (m) -> (instantiate expr.Prim m.[name], Named(m.Remove(name)))
+            | _, Unnamed (head :: tail) -> (instantiate expr.Prim head, Unnamed tail)
             | _ -> failwith "Bad arguments"
 
+        
         let rec loop (expr: Expr) v =
             match expr with
             | Pair (_, (left, right)) ->
@@ -129,6 +126,24 @@ type ContractParameters(typeExpression) =
                     PrimExpression.Create(D_Pair, args = Seq [ leftValue; rightValue ])
 
                 (Node p, next)
+            | Or(_, (left, right)) ->
+                match v with
+                | Named(_) -> failwith "Instantiating or by named arguments not supported yet"
+                | Unnamed(head::tail) ->
+                    match head with
+                        | :? Or as d ->
+                            if d = Or.Left
+                            then
+                                let (leftValue, next) = loop left (Unnamed tail) 
+                                let p = PrimExpression.Create(D_Left, args = leftValue)
+                                (Node p, next)
+                            else
+                                let (value, next) = loop right (Unnamed tail) 
+                                let p = PrimExpression.Create(D_Right, args = value)
+                                (Node p, next)
+                        | _ -> failwith "Bad parameter for Or"
+                 | _ -> failwith "Missing parameters for or"
+                            
             | Primitive (n) -> consume n v
             | _ -> failwith (sprintf "Bad parameter type. %s" (expr.ToString()))
 
