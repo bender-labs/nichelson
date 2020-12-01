@@ -3,32 +3,6 @@ namespace Bender.Michelson.Contract
 open Bender.Michelson
 open System
 
-(*
-    (pair nat nat)
-
-    -> [1 ; 2]
-
-    -> (Pair 1 2)
-
-    --
-
-    (list nat)
-    -> [[1; 2; 3; 5]]
-
-
-    (or (pair nat nat) nat)
-    -> (Left (pair nat nat))
-    -> 1 ; 2
-    [left 1 2]
-
-    parameters.extract(None).instanciate("mint", ["token_id" "mon_token" "amount" 10]);
-
-    let exp = instanciate (params, ["mint"], [ "token_id" "mon_token" "amount" 10 ])
-    // instanciate (params, [Left Right], [10])
-    let packed = pack exp
-    let payload = sign packed
-*)
-
 type Values =
     | Named of Map<string, obj>
     | Unnamed of obj list
