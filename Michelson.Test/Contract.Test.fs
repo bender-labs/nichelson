@@ -10,15 +10,6 @@ module ``Contract test`` =
     open FsUnit.Xunit
 
     [<Fact>]
-    let ``Should find by annotation`` () =
-        let parameterType = ContractParameters "(nat %amount)"
-
-        let result = parameterType.Find("%amount")
-
-        result.Expression
-        |> should equal (Parameters.fromMichelson "(nat %amount)")
-
-    [<Fact>]
     let ``Should find nested annotation`` () =
         let parameterType =
             ContractParameters "(or (nat %amount) nat)"
@@ -26,7 +17,7 @@ module ``Contract test`` =
         let result = parameterType.Find("%amount")
 
         result.Expression
-        |> should equal (Parameters.fromMichelson "(nat %amount)")
+        |> should equal (Parameters.fromMichelson "(nat)")
 
     [<Fact>]
     let ``Should extract sub contract`` () =
@@ -35,7 +26,7 @@ module ``Contract test`` =
 
         let result = contract.Only("%amount")
 
-        result.Find("%amount").Path |> should be Empty
+        result |> should not' (equal null)
 
     [<Fact>]
     let ``Should instantiate single parameter unamed`` () =
@@ -136,3 +127,18 @@ module ``Contract test`` =
 
         expression
         |> should equal (Expression.fromMichelson "(Left 10)")
+
+    [<Fact>]
+    let ``Should instantiate or by name``() =
+        let contract = ContractParameters "(or %action
+                   (string %change_keys)
+                   (nat %amount))"
+        
+        let left = contract.Instantiate(Rec [("%action", Rec [("%change_keys", StringArg "toto")])])
+        let right = contract.Instantiate(Rec [("%action", Rec [("%amount", IntArg 10L)])])
+        
+        left
+        |> should equal (Expression.fromMichelson @"(Left ""toto"")")
+        right
+        |> should equal (Expression.fromMichelson "(Right 10)")
+        

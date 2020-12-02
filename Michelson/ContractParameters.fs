@@ -51,7 +51,7 @@ type EntryPoint =
 module private EntryPoint =
     let create name expr path =
         { Name = name
-          Expression = expr
+          Expression = {expr with Annotations = []}
           Path = path }
 
 type ContractParameters(typeExpression) =
@@ -126,10 +126,10 @@ type ContractParameters(typeExpression) =
                     | Some t -> t
                     | None -> failwith (sprintf "Field not found %s" (name))
                 
-                (instantiate expr.Prim value, values)
-            | _, Tuple (head :: tail) -> (instantiate expr.Prim head, (Tuple tail))
-            | _, Value v -> (instantiate expr.Prim values, Tuple [])
-            | _ -> failwith "Bad arguments"
+                Some (instantiate expr.Prim value, values)
+            | _, Tuple (head :: tail) -> Some (instantiate expr.Prim head, (Tuple tail))
+            | _, Value v -> Some (instantiate expr.Prim values, Tuple [])
+            | _ -> None
 
 
         let rec loop (expr: Expr) (v:Arg) =
@@ -144,10 +144,9 @@ type ContractParameters(typeExpression) =
                 let sub =
                     match Arg.Find record node.Annotations.Head with
                     | Some (_, sub)->sub
-                    | None -> v
+                    | None -> failwith (sprintf "Missing field in record %s" node.Annotations.Head) 
                 let (leftValue, next) = loop left sub
                 let (rightValue, next) = loop right next
-
                 let p =
                     PrimExpression.Create(D_Pair, args = Seq [ leftValue; rightValue ])
 
@@ -160,7 +159,33 @@ type ContractParameters(typeExpression) =
                 | Right v ->
                     let (arg, _) = loop right v 
                     (Node (PrimExpression.Create(D_Right, args = arg)), v)
-            | Primitive (n), _ -> consume n v
+            | NamedOr(node, (left, right)), Record e ->
+                let sub =
+                     match Arg.Find e node.Annotations.Head with
+                     | Some (_,a) -> a
+                     | None -> failwith (sprintf "Missing field in record %s" node.Annotations.Head)
+                try
+                    let (leftValue, next) = loop left sub
+                    (Node (PrimExpression.Create(D_Left, args = leftValue)), next)
+                with
+                | _ ->
+                    let (rightValue, next) = loop right sub
+                    (Node (PrimExpression.Create(D_Right, args = rightValue)), next)
+                    
+            | Or(_, (left, right)), _ ->
+                
+                try
+                    let (leftValue, next) = loop left v
+                    (Node (PrimExpression.Create(D_Left, args = leftValue)), next)
+                with
+                | _ ->
+                    let (rightValue, next) = loop right v
+                    (Node (PrimExpression.Create(D_Right, args = rightValue)), next)                    
+                     
+            | Primitive (n), _ ->
+                match consume n v with
+                | Some v -> v
+                | None -> failwith "Couldn't instantiate"
             | _ -> failwith (sprintf "Bad parameter type. %s" (expr.ToString()))
 
         let (expr, _) = loop (Node t) values
