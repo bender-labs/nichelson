@@ -55,52 +55,41 @@ module Expr =
 
     let (|NamedOr|_|) input =
         match input with
-        | Node v ->
-            match v.Prim with
-            | T_Or -> if v.Annotations.IsEmpty then None else Some(v, v.Args |> orArgs)
-            | _ -> None
+        | Node ({ Prim = T_Or; Annotations = _ :: _ } as v) -> Some(v, v.Args |> orArgs)
         | _ -> None
-   
+
     let (|Or|_|) input =
         match input with
-        | Node v ->
-            match v.Prim with
-            | T_Or -> Some(v, v.Args |> orArgs)
-            | _ -> None
+        | Node ({ Prim = T_Or } as v) -> Some(v, v.Args |> orArgs)
         | _ -> None
 
     let (|NamedNode|_|) input =
         match input with
-        | Node v -> if v.Annotations.IsEmpty then None else Some(v)
+        | Node ({ Annotations = _ :: _ } as v) -> Some v
         | _ -> None
 
     let (|Pair|_|) input =
         match input with
-        | Node v ->
-            match v.Prim with
-            | T_Pair ->  Some(v, v.Args |> orArgs)
-            | _ -> None
+        | Node ({ Prim = T_Pair } as v) -> Some(v, v.Args |> orArgs)
         | _ -> None
-        
+
     let (|AnonymousPair|_|) input =
         match input with
-        | Node v ->
-            match v.Prim with
-            | T_Pair ->  if v.Annotations.IsEmpty then Some(v, v.Args |> orArgs) else None
-            | _ -> None
+        | Node ({ Prim = T_Pair; Annotations = [] } as v) -> Some(v, v.Args |> orArgs)
         | _ -> None
-        
+
     let (|Primitive|_|) input =
         match input with
         | Node v ->
             match v.Prim with
-            | T_String | T_Nat | T_Address | T_Signature ->  Some(v)
+            | T_String
+            | T_Nat
+            | T_Address
+            | T_Signature -> Some(v)
             | _ -> None
-        | _ -> None    
-    
-    let (|IntLiteral|_|) input = 
+        | _ -> None
+
+    let (|IntLiteral|_|) input =
         match input with
-            | IntLiteral i  -> Some i
-            | _ -> None
-            
-        
+        | IntLiteral i -> Some i
+        | _ -> None

@@ -48,7 +48,7 @@ module ``End to end`` =
             ContractParameters "(pair (pair (or %action
                    (unit %change_keys)
                    (pair
-                      (pair %action
+                      (pair %invoke
                          (pair (nat %amount) (address %owner))
                          (pair (string %token_id) (string %tx_id)))
                       (address %target)))
@@ -57,8 +57,16 @@ module ``End to end`` =
 
         let r =
             parameterType.Instantiate
-                (Rec [ ("%action", RightArg(Rec []))
-                       ("%target", StringArg "target")
+                (Rec [ ("%action",
+                        Rec [ ("%invoke",
+                               Rec [ ("%amount", IntArg 100L)
+                                     ("%owner", StringArg "tz1exrEuATYhFmVSXhkCkkFzY72T75hpsthj")
+                                     ("%token_id", StringArg "token")
+                                     ("%tx_id", StringArg "tx")
+                                      ])
+                              ("%target", StringArg "KT1MUrrpFyjy8tu3udaRk74uA1Je7q6iftTZ")
+                         ])
+                       ("%counter", IntArg 10L)
                        ("%signatures",
                         List [ Tuple [ StringArg "signer_id"
                                        StringArg "signature" ] ]) ])

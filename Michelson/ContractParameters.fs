@@ -38,7 +38,7 @@ module Arg =
 
         match r with
         | Some (_, v) -> v
-        | None -> failwith (sprintf "Missing field in record %s" key)
+        | None -> failwith (sprintf "Field %s not found in %s" key (fields.ToString()))
 
 type Values =
     | Named of Map<string, obj>
@@ -160,7 +160,8 @@ type ContractParameters(typeExpression) =
             | Pair (_, children), Tuple _ -> explorePair children v loop
             | Pair (node, children), Record record ->
                 let sub = Arg.Find record node.Annotations.Head
-                explorePair children sub loop
+                let (n, _) = explorePair children sub loop
+                (n, v)
             | Or (_, (left, right)), Either e ->
                 match e with
                 | Left v ->
@@ -171,11 +172,12 @@ type ContractParameters(typeExpression) =
                     (Node(PrimExpression.Create(D_Right, args = arg)), v)
             | NamedOr (node, routes), Record e ->
                 let sub = Arg.Find e node.Annotations.Head
-                exploreLeftOrRight routes sub loop
+                let (n, _) = exploreLeftOrRight routes sub loop
+                (n, v)
 
             | Or (_, routes), _ -> exploreLeftOrRight routes v loop
             | Primitive (n), _ -> consume n v
-            | _ -> failwith (sprintf "Bad parameter type. %s" (expr.ToString()))
+            | _ -> failwith (sprintf "Bad parameter type. %s \nfor\n %s" (v.ToString()) (expr.ToString()))
 
         let (expr, _) = loop (Node t) values
         expr
