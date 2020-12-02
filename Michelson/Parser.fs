@@ -95,18 +95,18 @@ module Expression =
     let (private values: Parser<Expr, UserState>), (private valuesR: Parser<Expr, UserState> ref) =
         createParserForwardedToRef ()
 
-    let private intLiteral = pint64 |>> (Int)
+    let private intLiteral = pint64 |>> (IntLiteral)
 
     let private stringLiteral =
         let normalCharSnippet = manySatisfy (fun c -> c <> '"')
 
         between (pstring @"""") (pstring @"""") normalCharSnippet
-        |>> (String)
+        |>> (StringLiteral)
 
     let private hexLiteral =
         let start = pstring "0x"
         let hex = manySatisfy isHex
-        pipe2 start hex (fun s n -> s + n |> Encoder.hexToBytes |> Bytes)
+        pipe2 start hex (fun s n -> s + n |> Encoder.hexToBytes |> BytesLiteral)
 
     let private exprWithTwoArgs = nodeWithTwoArgs values
     let private exprWithOneArg = nodeWithOneArg values

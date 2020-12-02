@@ -1,6 +1,7 @@
 namespace Michelson.Test
 
 open Bender.Michelson.Contract
+open Bender.Michelson.Contract.Arg
 
 module ``End to end`` =
 
@@ -29,10 +30,10 @@ module ``End to end`` =
         let parameters =
             parameterType
                 .Only("%mint")
-                .Instantiate(Unnamed [ 10L
-                                       "tz1exrEuATYhFmVSXhkCkkFzY72T75hpsthj%mint"
-                                       "ethContract"
-                                       "ethTxId" ])
+                .Instantiate(Tuple [ IntArg 10L
+                                     StringArg "tz1exrEuATYhFmVSXhkCkkFzY72T75hpsthj%mint"
+                                     StringArg "ethContract"
+                                     StringArg "ethTxId" ])
 
         let encoded = Encoder.pack parameters
 
@@ -46,7 +47,7 @@ module ``End to end`` =
         let parameterType =
             ContractParameters "(pair (pair (or %action
                    (unit %change_keys)
-                   (pair %signer_operation
+                   (pair
                       (pair %action
                          (pair (nat %amount) (address %owner))
                          (pair (string %token_id) (string %tx_id)))
@@ -56,14 +57,11 @@ module ``End to end`` =
 
         let r =
             parameterType.Instantiate
-                (Unnamed [ Or.Right
-                           100L
-                           "tz1exrEuATYhFmVSXhkCkkFzY72T75hpsthj"
-                           "tokenId"
-                           "txId"
-                           "KT1MUrrpFyjy8tu3udaRk74uA1Je7q6iftTZ"
-                           4L
-                           [ [ "id"
-                               "edsigtfKWaNLGaSC4kdXitkgS9rrcniWdR2NTuUJG8ubVXKLMyi8ZUvem2A38CXZaYdfBbSxY1gEHLkoqHZ9EBunHSq1zZz9t11" ] ] ])
+                (Rec [ ("%action", RightArg(Rec []))
+                       ("%target", StringArg "target")
+                       ("%signatures",
+                        List [ Tuple [ StringArg "signer_id"
+                                       StringArg "signature" ] ]) ])
+
 
         parameterType |> should not' (equal null)

@@ -2,6 +2,7 @@ namespace Michelson.Test
 
 open Bender.Michelson
 open Bender.Michelson.Contract
+open Bender.Michelson.Contract.Arg
 
 module ``Contract test`` =
 
@@ -41,7 +42,7 @@ module ``Contract test`` =
         let contract = ContractParameters "(nat %amount)"
 
         let expression =
-            contract.Instantiate("%amount", Unnamed [ 10L ])
+            contract.Instantiate("%amount", IntArg 10L)
 
         expression
         |> should equal (Expression.fromMichelson ("10"))
@@ -50,8 +51,9 @@ module ``Contract test`` =
     let ``Should instantiate single parameter named`` () =
         let contract = ContractParameters "(nat %amount)"
 
+
         let expression =
-            contract.Instantiate("%amount", Named([ ("%amount", 10L :> obj) ] |> Map.ofList))
+            contract.Instantiate(Rec([ ("%amount", IntArg 10L) ]))
 
         expression
         |> should equal (Expression.fromMichelson ("10"))
@@ -62,7 +64,7 @@ module ``Contract test`` =
             ContractParameters "(pair %ep (nat %amount) (string %id))"
 
         let expression =
-            contract.Instantiate("%ep", Unnamed [ 10L; "id" ])
+            contract.Instantiate("%ep", Tuple [ IntArg 10L; StringArg "id" ])
 
         expression
         |> should equal (Expression.fromMichelson (@"Pair 10 ""id"""))
@@ -75,10 +77,8 @@ module ``Contract test`` =
         let expression =
             contract.Instantiate
                 ("%ep",
-                 Named
-                     ([ ("%amount", 10L :> obj)
-                        ("%id", "id" :> obj) ]
-                      |> Map.ofList))
+                 Rec [ ("%amount", IntArg 10L)
+                       ("%id", StringArg "id") ])
 
         expression
         |> should equal (Expression.fromMichelson (@"Pair 10 ""id"""))
@@ -91,10 +91,9 @@ module ``Contract test`` =
         let expression =
             contract.Instantiate
                 ("%ep",
-                 Named
-                     ([ ("%amount", 10L :> obj)
-                        ("%id", "id" :> obj) ]
-                      |> Map.ofList))
+                 Rec [ ("%amount", IntArg 10L)
+                       ("%id", StringArg "id") ])
+
 
         expression
         |> should equal (Expression.fromMichelson (@"(Left (Pair 10 ""id""))"))
@@ -106,24 +105,34 @@ module ``Contract test`` =
 
         let expression =
             contract.Instantiate
-                (
-                 Unnamed [10L ; "id" ; 30L])
+                (Tuple [ IntArg 10L
+                         StringArg "id"
+                         IntArg 30L ])
 
         expression
         |> should equal (Expression.fromMichelson (@"(Pair (Pair 10 ""id"") 30)"))
-    
+
     [<Fact>]
-    let ``Should instantiate signature``() =
+    let ``Should instantiate signature`` () =
         let contract = ContractParameters "signature"
-        
-        let expression = contract.Instantiate(Unnamed ["edsigtfKWaNLGaSC4kdXitkgS9rrcniWdR2NTuUJG8ubVXKLMyi8ZUvem2A38CXZaYdfBbSxY1gEHLkoqHZ9EBunHSq1zZz9t11"])
-        
-        expression |> should equal (Expression.fromMichelson "0x396cf2a25842bea1de3c28f5f5c551629511cea7b1eb63078b7f6a91709132a02e3b33bb7c7f9fe9ba821aa01c3589135fd9c479fc3a037e3b4c9cb9d45f8a03") 
-    
+
+        let expression =
+            contract.Instantiate
+                (StringArg
+                    "edsigtfKWaNLGaSC4kdXitkgS9rrcniWdR2NTuUJG8ubVXKLMyi8ZUvem2A38CXZaYdfBbSxY1gEHLkoqHZ9EBunHSq1zZz9t11")
+
+        expression
+        |> should
+            equal
+               (Expression.fromMichelson
+                   "0x396cf2a25842bea1de3c28f5f5c551629511cea7b1eb63078b7f6a91709132a02e3b33bb7c7f9fe9ba821aa01c3589135fd9c479fc3a037e3b4c9cb9d45f8a03")
+
     [<Fact>]
-    let ``Should instantiate or directly``() =
+    let ``Should instantiate or directly`` () =
         let contract = ContractParameters "(or nat string)"
-        
-        let expression = contract.Instantiate(Unnamed [Or.Left;10L])
-        
-        expression |> should equal (Expression.fromMichelson "(Left 10)")
+
+        let expression =
+            contract.Instantiate(LeftArg(IntArg 10L))
+
+        expression
+        |> should equal (Expression.fromMichelson "(Left 10)")

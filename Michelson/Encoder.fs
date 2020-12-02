@@ -91,15 +91,15 @@ let pack (expr: Expr) =
     let rec loop acc v =
         match v with
         | Node p -> encodePrim acc p loop
-        | Int i ->
+        | IntLiteral i ->
             res.Add(0x00uy)
             res.AddRange(forgeInt i)
             acc
-        | String s ->
+        | StringLiteral s ->
             res.Add(0x01uy)
             res.AddRange(encodeString s)
             acc
-        | Bytes b ->
+        | BytesLiteral b ->
             res.Add(0x0Auy)
             res.AddRange(encodeArray b)
             acc

@@ -24,9 +24,9 @@ type PrimExpression =
           Annotations = defaultArg annotation [] }
 
 and Expr =
-    | Int of int64
-    | String of string
-    | Bytes of byte array
+    | IntLiteral of int64
+    | StringLiteral of string
+    | BytesLiteral of byte array
     | Node of PrimExpression
     | Seq of Expr list
 
@@ -53,14 +53,14 @@ module Expr =
 
     let private orArgs (Seq ([ left; right ])) = (left, right)
 
-    let (|AnnotatedOr|_|) input =
+    let (|NamedOr|_|) input =
         match input with
         | Node v ->
             match v.Prim with
             | T_Or -> if v.Annotations.IsEmpty then None else Some(v, v.Args |> orArgs)
             | _ -> None
         | _ -> None
-
+   
     let (|Or|_|) input =
         match input with
         | Node v ->
@@ -69,7 +69,7 @@ module Expr =
             | _ -> None
         | _ -> None
 
-    let (|AnnotatedNode|_|) input =
+    let (|NamedNode|_|) input =
         match input with
         | Node v -> if v.Annotations.IsEmpty then None else Some(v)
         | _ -> None
@@ -79,6 +79,14 @@ module Expr =
         | Node v ->
             match v.Prim with
             | T_Pair ->  Some(v, v.Args |> orArgs)
+            | _ -> None
+        | _ -> None
+        
+    let (|AnonymousPair|_|) input =
+        match input with
+        | Node v ->
+            match v.Prim with
+            | T_Pair ->  if v.Annotations.IsEmpty then Some(v, v.Args |> orArgs) else None
             | _ -> None
         | _ -> None
         
@@ -92,7 +100,7 @@ module Expr =
     
     let (|IntLiteral|_|) input = 
         match input with
-            | Int i  -> Some i
+            | IntLiteral i  -> Some i
             | _ -> None
             
         

@@ -156,20 +156,20 @@ module ``Parser Test`` =
         let ``Should parse int`` () =
             let result = parse "32"
 
-            result |> should equal (Expr.Int 32L)
+            result |> should equal (Expr.IntLiteral 32L)
 
         [<Fact>]
         let ``Should parse String`` () =
             let result = parse @"""Test"""
 
-            result |> should equal (Expr.String "Test")
+            result |> should equal (Expr.StringLiteral "Test")
 
         [<Fact>]
         let ``Should parse Pair`` () =
             let result = parse "(Pair 32 43)"
 
             result
-            |> should equal (Expr.Node(PrimExpression.Create(Prim.D_Pair, args = Seq [ Int 32L; Int 43L ])))
+            |> should equal (Expr.Node(PrimExpression.Create(Prim.D_Pair, args = Seq [ IntLiteral 32L; IntLiteral 43L ])))
 
         [<Fact>]
         let ``Should parse nested Pair`` () =
@@ -182,24 +182,24 @@ module ``Parser Test`` =
                        (PrimExpression.Create
                            (Prim.D_Pair,
                             args =
-                                Seq [ Node(PrimExpression.Create(Prim.D_Pair, args = Seq [ Int 32L; Int 43L ]))
-                                      String "2" ]))
+                                Seq [ Node(PrimExpression.Create(Prim.D_Pair, args = Seq [ IntLiteral 32L; IntLiteral 43L ]))
+                                      StringLiteral "2" ]))
                    )
         [<Fact>]
         let ``Should parse Left``() =
             let result = parse "(Left 42)"
             
-            result |> should equal (Expr.Node(PrimExpression.Create(Prim.D_Left, args = Int 42L
+            result |> should equal (Expr.Node(PrimExpression.Create(Prim.D_Left, args = IntLiteral 42L
                                                                     
                                                                     )))
         [<Fact>]
         let ``Should parse Right``() =
             let result = parse "(Right 42)"
             
-            result |> should equal (Expr.Node(PrimExpression.Create(Prim.D_Right, args =  Int 42L)))
+            result |> should equal (Expr.Node(PrimExpression.Create(Prim.D_Right, args =  IntLiteral 42L)))
         
         [<Fact>]
         let ``Should parse binary``() =
             let result = parse "0x050a000000160000d3f99177aa262227a65b344416f85de34bf21420"
             
-            result |> should equal (Expr.Bytes (Encoder.hexToBytes "0x050a000000160000d3f99177aa262227a65b344416f85de34bf21420")) 
+            result |> should equal (Expr.BytesLiteral (Encoder.hexToBytes "0x050a000000160000d3f99177aa262227a65b344416f85de34bf21420")) 
