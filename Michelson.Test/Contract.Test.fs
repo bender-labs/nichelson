@@ -122,11 +122,14 @@ module ``Contract test`` =
     let ``Should instantiate or directly`` () =
         let contract = ContractParameters "(or nat string)"
 
-        let expression =
+        let left =
             contract.Instantiate(LeftArg(IntArg 10L))
+        let right =
+            contract.Instantiate(RightArg(StringArg "toto"))
 
-        expression
+        left
         |> should equal (Expression.fromMichelson "(Left 10)")
+        right |> should equal (Expression.fromMichelson @"(Right ""toto"")")
 
     [<Fact>]
     let ``Should instantiate or by name``() =
