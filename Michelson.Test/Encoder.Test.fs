@@ -84,6 +84,13 @@ module ``Encoder test`` =
     let ``Should parse hex string``() =
         let bytes = pack "100"
         
-        let actual = Encoder.hexToBytes "0x0500a401"
+        let expected = Encoder.hexToBytes "0x0500a401"
+        bytes |> should equal expected
+
+    [<Fact>]
+    let ``Should encode list``() =
+        let bytes = pack "{200;200}"
         
-        actual |> should equal bytes
+        (Encoder.byteToHex bytes) |> should equal "0x050200000006008803008803"
+                                         
+                                         

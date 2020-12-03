@@ -98,7 +98,7 @@ module Expression =
     let private intLiteral = pint64 |>> (IntLiteral)
 
     let private stringLiteral =
-        let normalCharSnippet = manySatisfy (fun c -> c <> '"')
+        let normalCharSnippet = manySatisfy ((<>) '"')
 
         between (pstring @"""") (pstring @"""") normalCharSnippet
         |>> (StringLiteral)
@@ -108,6 +108,12 @@ module Expression =
         let hex = manySatisfy isHex
         pipe2 start hex (fun s n -> s + n |> Encoder.hexToBytes |> BytesLiteral)
 
+    let private listD =
+        let sep = pstring ";"
+        let elems = sepBy values sep 
+        between (pstring "{") (pstring "}") elems
+        |>> (Seq)
+    
     let private exprWithTwoArgs = nodeWithTwoArgs values
     let private exprWithOneArg = nodeWithOneArg values
 
@@ -126,7 +132,8 @@ module Expression =
                  stringLiteral
                  pairD
                  leftD
-                 rightD ]
+                 rightD
+                 listD ]
 
     let private instructionBetweenParen =
         spaces

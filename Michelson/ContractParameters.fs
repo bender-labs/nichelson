@@ -176,6 +176,25 @@ type ContractParameters(typeExpression) =
                 (n, v)
 
             | Or (_, routes), _ -> exploreLeftOrRight routes v loop
+            | Node { Prim = T_List
+                     Args = (Node (listType)) },
+              (List elements) ->
+                let children =
+                    elements
+                    |> Seq.map (fun e ->
+                        let (exp, _) = loop (Node listType) e
+                        exp)
+                    |> Seq.toList
+
+                (Seq children, v)
+            | Node { Prim = T_List
+                     Args = (Node _)
+                     Annotations = name :: _ } as n,
+              (Record r) ->
+                let sub = Arg.Find r name
+                let (r, _) = loop expr sub
+                (r, v)
+
             | Primitive (n), _ -> consume n v
             | _ -> failwith (sprintf "Bad parameter type. %s \nfor\n %s" (v.ToString()) (expr.ToString()))
 

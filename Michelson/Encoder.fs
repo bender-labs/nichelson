@@ -92,17 +92,26 @@ let pack (expr: Expr) =
         match v with
         | Node p -> encodePrim acc p loop
         | IntLiteral i ->
-            res.Add(0x00uy)
-            res.AddRange(forgeInt i)
+            acc.Add(0x00uy)
+            acc.AddRange(forgeInt i)
             acc
         | StringLiteral s ->
-            res.Add(0x01uy)
-            res.AddRange(encodeString s)
+            acc.Add(0x01uy)
+            acc.AddRange(encodeString s)
             acc
         | BytesLiteral b ->
-            res.Add(0x0Auy)
-            res.AddRange(encodeArray b)
+            acc.Add(0x0Auy)
+            acc.AddRange(encodeArray b)
             acc
+        | Seq elements ->
+            acc.Add(0x02uy)
+            let arrayBytes = List<byte>()
+            elements
+            |> Seq.iter (fun x -> loop (arrayBytes) x |> ignore)
+            let bytes = arrayBytes |> Seq.toArray |> encodeArray
+            acc.AddRange(bytes)
+            acc
+
         | t -> failwith (sprintf "Unsupported %s" (t.ToString()))
 
     (loop res expr).ToArray()
@@ -120,5 +129,5 @@ let hexToBytes str =
     |> Seq.windowed 2
     |> Seq.mapi (fun i j -> (i, j))
     |> Seq.filter (fun (i, j) -> i % 2 = 0)
-    |> Seq.map (fun (_, j) -> Byte.Parse(new System.String(j), System.Globalization.NumberStyles.AllowHexSpecifier))
+    |> Seq.map (fun (_, j) -> Byte.Parse(String(j), System.Globalization.NumberStyles.AllowHexSpecifier))
     |> Array.ofSeq

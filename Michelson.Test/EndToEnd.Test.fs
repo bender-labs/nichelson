@@ -69,7 +69,6 @@ module ``End to end`` =
                        ("%counter", IntArg 10L)
                        ("%signatures",
                         List [ Tuple [ StringArg "signer_id"
-                                       StringArg "signature" ] ]) ])
-
+                                       StringArg "edsigtfKWaNLGaSC4kdXitkgS9rrcniWdR2NTuUJG8ubVXKLMyi8ZUvem2A38CXZaYdfBbSxY1gEHLkoqHZ9EBunHSq1zZz9t11" ] ]) ])
 
         parameterType |> should not' (equal null)
