@@ -9,6 +9,7 @@ type Prim =
     | T_String
     | T_Address
     | T_Signature
+    | T_ChainId
     | T_List
     | D_Pair
     | D_Right
@@ -55,7 +56,7 @@ module Expr =
 
     let (|NamedOr|_|) input =
         match input with
-        | Node ({ Prim = T_Or; Annotations = _ :: _ } as v) -> Some(v, v.Args |> orArgs)
+        | Node ({ Prim = T_Or; Annotations = name :: _ } as v) -> Some(v, name, v.Args |> orArgs)
         | _ -> None
 
     let (|Or|_|) input =
@@ -65,18 +66,13 @@ module Expr =
 
     let (|NamedNode|_|) input =
         match input with
-        | Node ({ Annotations = _ :: _ } as v) -> Some v
+        | Node ({ Annotations = name :: _ ; Args = args} as n)  -> Some (n, name, args)
         | _ -> None
-
-    let (|Pair|_|) input =
+        
+    let (|ANode|_|) input =
         match input with
-        | Node ({ Prim = T_Pair } as v) -> Some(v, v.Args |> orArgs)
-        | _ -> None
-
-    let (|AnonymousPair|_|) input =
-        match input with
-        | Node ({ Prim = T_Pair; Annotations = [] } as v) -> Some(v, v.Args |> orArgs)
-        | _ -> None
+        | Node ({ Args = args} as n)  -> Some (n, args)
+        | _ -> None        
 
     let (|Primitive|_|) input =
         match input with

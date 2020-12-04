@@ -71,10 +71,9 @@ type ContractParameters(typeExpression) =
                        : {| Locations: Map<string, EntryPoint>
                             Path: Prim list |} =
             match t with
-            | NamedOr (node, (left, right)) ->
+            | NamedOr (node, name, (left, right)) ->
                 let updatedLocations =
-                    s.Locations.Add
-                        (node.Annotations.Head, EntryPoint.create node.Annotations.Head node (s.Path |> List.rev))
+                    s.Locations.Add(name, EntryPoint.create name node (s.Path |> List.rev))
 
                 let newState =
                     lookup
@@ -94,10 +93,9 @@ type ContractParameters(typeExpression) =
                     {| Locations = newState.Locations
                        Path = D_Right :: s.Path |}
                     right
-            | NamedNode (node) ->
+            | NamedNode (node, name, _) ->
                 let updatedLocations =
-                    s.Locations.Add
-                        (node.Annotations.Head, EntryPoint.create node.Annotations.Head node (s.Path |> List.rev))
+                    s.Locations.Add(name, EntryPoint.create name node (s.Path |> List.rev))
 
                 {| s with
                        Locations = updatedLocations |}
@@ -109,31 +107,6 @@ type ContractParameters(typeExpression) =
 
     let instantiateWithArg t (values: Arg) =
 
-        let instantiate (prim) (v: Arg) =
-            match prim, v with
-            | T_String, Value (String s) -> StringLiteral s
-            | T_Nat, Value (Int i) -> IntLiteral i
-            | T_Address, Value (String s) ->
-                BytesLiteral
-                    (s
-                     |> TezosAddress.FromString
-                     |> TezosAddress.ToBytes)
-            | T_Address, Value (Address addr) -> BytesLiteral(addr |> TezosAddress.ToBytes)
-            | T_Signature, Value (String s) -> BytesLiteral(s |> Signature.FromString |> Signature.ToBytes)
-            | T_Signature, Value (Signature s) -> BytesLiteral(s |> Signature.ToBytes)
-            | t, _ as arg ->
-                failwith (sprintf "Bad parameters. %s does not match with %s" (t.ToString()) (arg.ToString()))
-
-        let consume (expr: PrimExpression) (values: Arg) =
-            match expr.Annotations, values with
-            | [ name ], Record (m) ->
-                let value = Arg.Find m name
-                (instantiate expr.Prim value, values)
-            | _, Tuple (head :: tail) -> (instantiate expr.Prim head, (Tuple tail))
-            | _, Value v -> (instantiate expr.Prim values, Tuple [])
-            | _ -> failwith (sprintf "Couldn't instantiate %s from %s" (expr.ToString()) (values.ToString()))
-
-
         let exploreLeftOrRight routes args loop =
             let (left, right) = routes
 
@@ -144,59 +117,73 @@ type ContractParameters(typeExpression) =
                 let (rightValue, next) = loop right args
                 (Node(PrimExpression.Create(D_Right, args = rightValue)), next)
 
-        let explorePair children args loop =
-            let (left, right) = children
-            let (leftValue, next) = loop left args
-            let (rightValue, next) = loop right next
-
-            let p =
-                PrimExpression.Create(D_Pair, args = Seq [ leftValue; rightValue ])
-
-            (Node p, next)
-
-        let rec loop (expr: Expr) (v: Arg) =
-            match expr, v with
-            | AnonymousPair (_, children), _
-            | Pair (_, children), Tuple _ -> explorePair children v loop
-            | Pair (node, children), Record record ->
-                let sub = Arg.Find record node.Annotations.Head
-                let (n, _) = explorePair children sub loop
-                (n, v)
-            | Or (_, (left, right)), Either e ->
-                match e with
-                | Left v ->
-                    let (arg, _) = loop left v
-                    (Node(PrimExpression.Create(D_Left, args = arg)), v)
-                | Right v ->
-                    let (arg, _) = loop right v
-                    (Node(PrimExpression.Create(D_Right, args = arg)), v)
-            | NamedOr (node, routes), Record e ->
-                let sub = Arg.Find e node.Annotations.Head
-                let (n, _) = exploreLeftOrRight routes sub loop
-                (n, v)
-
-            | Or (_, routes), _ -> exploreLeftOrRight routes v loop
-            | Node { Prim = T_List
-                     Args = (Node (listType)) },
-              (List elements) ->
+        let instantiate loop prim v =
+            match prim, v with
+            | { Prim = T_Pair; Args = Seq (args) }, _ ->
+                let (next,i) =
+                    args
+                    |> Seq.fold (fun (v,acc) e ->
+                        let (r, next) = loop e v
+                        (next, r::acc)
+                        ) (v, [])
+                let i = i |> Seq.toList |> List.rev
+                (Node(PrimExpression.Create(D_Pair, args = Seq i)), next)
+            | { Prim = T_List
+                Args = Node _ as listType },
+              List elements ->
                 let children =
                     elements
                     |> Seq.map (fun e ->
-                        let (exp, _) = loop (Node listType) e
+                        let (exp, _) = loop listType e
                         exp)
                     |> Seq.toList
 
                 (Seq children, v)
-            | Node { Prim = T_List
-                     Args = (Node _)
-                     Annotations = name :: _ } as n,
-              (Record r) ->
-                let sub = Arg.Find r name
-                let (r, _) = loop expr sub
-                (r, v)
+            | { Prim = T_Or
+                Args = Seq ([ left; _ ]) },
+              Either (Left v) ->
+                let (arg, _) = loop left v
+                (Node(PrimExpression.Create(D_Left, args = arg)), v)
+            | { Prim = T_Or
+                Args = Seq ([ _; right ]) },
+              Either (Right v) ->
+                let (arg, _) = loop right v
+                (Node(PrimExpression.Create(D_Right, args = arg)), v)
+            | { Prim = T_Or
+                Args = Seq ([ left; right ]) },
+              _ ->
+                let (r, _) = exploreLeftOrRight (left, right) v loop
+                (r,v)
+            | { Prim = T_String }, Value (String s) -> (StringLiteral s, v)
+            | { Prim = T_Nat }, Value (Int i) -> (IntLiteral i,v)
+            | { Prim = T_Address }, Value (String s) ->
+                ((BytesLiteral
+                    (s
+                     |> TezosAddress.FromString
+                     |> TezosAddress.ToBytes)), v)
+            | { Prim = T_Address }, Value (Address addr) -> (BytesLiteral(addr |> TezosAddress.ToBytes), v)
+            | { Prim = T_Signature }, Value (String s) -> (BytesLiteral(s |> Signature.FromString |> Signature.ToBytes),v)
+            | { Prim = T_Signature }, Value (Signature s) -> (BytesLiteral(s |> Signature.ToBytes),v)
+            | t, _ as arg ->
+                failwith (sprintf "Bad parameters. %s does not match with %s" (t.ToString()) (arg.ToString()))
 
-            | Primitive (n), _ -> consume n v
-            | _ -> failwith (sprintf "Bad parameter type. %s \nfor\n %s" (v.ToString()) (expr.ToString()))
+        let consume loop (expr: PrimExpression) (values: Arg) =
+            match Node expr, values with
+            | Primitive _, Tuple (head :: tail) ->
+                let (i,_) = instantiate loop expr head
+                (i, Tuple tail)
+            | _, _ -> instantiate loop expr values
+
+
+        let rec loop (expr: Expr) (args: Arg) =
+            match expr, args with
+            | NamedNode (prim, name, _), Record record ->
+                let field = Arg.Find record name
+                let (n, _) = consume loop prim field
+                (n, args)
+            | ANode (prim, _), _ -> consume loop prim args
+
+            | _ -> failwith (sprintf "Bad parameter type. %s \nfor\n %s" (args.ToString()) (expr.ToString()))
 
         let (expr, _) = loop (Node t) values
         expr
