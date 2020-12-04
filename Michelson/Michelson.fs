@@ -81,6 +81,7 @@ module Expr =
             | T_String
             | T_Nat
             | T_Address
+            | T_ChainId
             | T_Signature -> Some(v)
             | _ -> None
         | _ -> None

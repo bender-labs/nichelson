@@ -120,12 +120,12 @@ type ContractParameters(typeExpression) =
         let instantiate loop prim v =
             match prim, v with
             | { Prim = T_Pair; Args = Seq (args) }, _ ->
-                let (next,i) =
+                let (next, i) =
                     args
-                    |> Seq.fold (fun (v,acc) e ->
+                    |> Seq.fold (fun (v, acc) e ->
                         let (r, next) = loop e v
-                        (next, r::acc)
-                        ) (v, [])
+                        (next, r :: acc)) (v, [])
+
                 let i = i |> Seq.toList |> List.rev
                 (Node(PrimExpression.Create(D_Pair, args = Seq i)), next)
             | { Prim = T_List
@@ -153,24 +153,27 @@ type ContractParameters(typeExpression) =
                 Args = Seq ([ left; right ]) },
               _ ->
                 let (r, _) = exploreLeftOrRight (left, right) v loop
-                (r,v)
+                (r, v)
             | { Prim = T_String }, Value (String s) -> (StringLiteral s, v)
-            | { Prim = T_Nat }, Value (Int i) -> (IntLiteral i,v)
+            | { Prim = T_Nat }, Value (Int i) -> (IntLiteral i, v)
             | { Prim = T_Address }, Value (String s) ->
                 ((BytesLiteral
                     (s
                      |> TezosAddress.FromString
-                     |> TezosAddress.ToBytes)), v)
+                     |> TezosAddress.ToBytes)),
+                 v)
             | { Prim = T_Address }, Value (Address addr) -> (BytesLiteral(addr |> TezosAddress.ToBytes), v)
-            | { Prim = T_Signature }, Value (String s) -> (BytesLiteral(s |> Signature.FromString |> Signature.ToBytes),v)
-            | { Prim = T_Signature }, Value (Signature s) -> (BytesLiteral(s |> Signature.ToBytes),v)
-            | t, _ as arg ->
-                failwith (sprintf "Bad parameters. %s does not match with %s" (t.ToString()) (arg.ToString()))
+            | { Prim = T_Signature }, Value (String s) ->
+                (BytesLiteral(s |> Signature.FromString |> Signature.ToBytes), v)
+            | { Prim = T_Signature }, Value (Signature s) -> (BytesLiteral(s |> Signature.ToBytes), v)
+            | { Prim = T_ChainId }, Value (String s) -> (BytesLiteral (ChainId.toBytes s), v)
+            | _, _ as arg ->
+                failwith (sprintf "Bad parameters. \nPrim: %s \nParams:  %s" (prim.ToString()) (v.ToString()))
 
         let consume loop (expr: PrimExpression) (values: Arg) =
             match Node expr, values with
             | Primitive _, Tuple (head :: tail) ->
-                let (i,_) = instantiate loop expr head
+                let (i, _) = instantiate loop expr head
                 (i, Tuple tail)
             | _, _ -> instantiate loop expr values
 
@@ -183,7 +186,7 @@ type ContractParameters(typeExpression) =
                 (n, args)
             | ANode (prim, _), _ -> consume loop prim args
 
-            | _ -> failwith (sprintf "Bad parameter type. %s \nfor\n %s" (args.ToString()) (expr.ToString()))
+            | _ -> failwith (sprintf "Parameter can only contains Node. Found %s" (expr.ToString()))
 
         let (expr, _) = loop (Node t) values
         expr

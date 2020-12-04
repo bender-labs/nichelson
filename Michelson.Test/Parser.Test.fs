@@ -51,6 +51,13 @@ module ``Parser Test`` =
                 expr
                 |> should equal (PrimExpression.Create T_Signature)
 
+            [<Fact>]
+            let ``Should parse chain_id``() =
+                let expr = parse "chain_id"
+
+                expr
+                |> should equal (PrimExpression.Create T_ChainId)
+
         type Pair() =
 
             [<Fact>]
@@ -140,7 +147,7 @@ module ``Parser Test`` =
 
         type List() =
             [<Fact>]
-            let ``Should pare list`` () =
+            let ``Should parse list`` () =
                 let expr = parse "(list nat)"
 
                 let expected =

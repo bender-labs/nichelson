@@ -119,6 +119,14 @@ module ``Contract test`` =
                    "0x396cf2a25842bea1de3c28f5f5c551629511cea7b1eb63078b7f6a91709132a02e3b33bb7c7f9fe9ba821aa01c3589135fd9c479fc3a037e3b4c9cb9d45f8a03")
 
     [<Fact>]
+    let ``Should instantiate chain_id``() =
+        let contract = ContractParameters "chain_id"
+        
+        let expression = contract.Instantiate (StringArg "NetXm8tYqnMWky1")
+        
+        expression |> should equal (Expression.fromMichelson "0xa8365021")
+    
+    [<Fact>]
     let ``Should instantiate or directly`` () =
         let contract = ContractParameters "(or nat string)"
 

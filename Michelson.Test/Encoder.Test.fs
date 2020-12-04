@@ -1,7 +1,6 @@
 namespace Michelson.Test
 
 open Bender.Michelson
-open Bender.Michelson.Contract
 
 module ``Encoder test`` =
 
@@ -92,5 +91,4 @@ module ``Encoder test`` =
         let bytes = pack "{200;200}"
         
         (Encoder.byteToHex bytes) |> should equal "0x050200000006008803008803"
-                                         
-                                         
+                                  

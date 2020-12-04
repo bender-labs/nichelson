@@ -9,6 +9,7 @@
     <Compile Include="Parser.fs" />
     <Compile Include="TezosAddress.fs" />
     <Compile Include="Signature.fs" />
+    <Compile Include="ChainId.fs" />
     <Compile Include="ContractParameters.fs" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
