@@ -1,0 +1,4 @@
+type project
+licenseExpression MIT
+repositoryType git
+repositoryUrl https://github.com/bender-labs/nichelson.git
