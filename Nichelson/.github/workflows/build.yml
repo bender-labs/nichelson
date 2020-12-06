@@ -1,0 +1,33 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: "5.0"
+      - name: Restore tools
+        run: dotnet tool restore
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+      - name: Test
+        uses: zyborg/dotnet-tests-report@v1.0.0
+        with:
+          no_restore: true
+          msbuild_verbosity: m
+          report_name: TzWatchTests
+          report_title: TzWatch Tests
+          github_token: ${{ secrets.GITHUB_TOKEN }}
