@@ -1,6 +1,6 @@
-namespace Michelson.Test
+namespace Nichelson.Test
 
-open Bender.Michelson
+open Nichelson
 
 module ``Parser Test`` =
     open Xunit

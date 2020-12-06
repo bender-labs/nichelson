@@ -1,4 +1,4 @@
-namespace Bender.Michelson
+namespace Nichelson
 
 type Annotation = string list
 

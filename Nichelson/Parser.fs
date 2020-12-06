@@ -1,8 +1,7 @@
 [<AutoOpen>]
-module Bender.Michelson.Parser
+module Nichelson.Parser
 
 open FParsec
-open Bender.Michelson
 
 type private UserState = unit
 

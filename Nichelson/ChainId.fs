@@ -1,4 +1,4 @@
-namespace Bender.Michelson
+namespace Nichelson
 
 open Netezos.Forge.Utils
 

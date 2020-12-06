@@ -1,7 +1,6 @@
-namespace Michelson.Test
+namespace Nichelson.Test
 
-open System
-open Bender.Michelson
+open Nichelson
 open Xunit
 
 module ``Address test`` =

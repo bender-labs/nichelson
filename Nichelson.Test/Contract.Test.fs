@@ -1,8 +1,8 @@
-namespace Michelson.Test
+namespace Nichelson.Test
 
-open Bender.Michelson
-open Bender.Michelson.Contract
-open Bender.Michelson.Contract.Arg
+open Nichelson
+open Nichelson.Contract
+open Nichelson.Contract.Arg
 
 module ``Contract test`` =
 

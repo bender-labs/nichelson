@@ -8,9 +8,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".paket", ".paket", "{74A61D
 		paket.dependencies = paket.dependencies
 	EndProjectSection
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Michelson", "Michelson\Michelson.fsproj", "{09FEE7CB-0D99-4830-8186-8191917F637F}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Nichelson", "Nichelson\Nichelson.fsproj", "{09FEE7CB-0D99-4830-8186-8191917F637F}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Michelson.Test", "Michelson.Test\Michelson.Test.fsproj", "{0D1DEC84-807D-4972-A111-69F7F3D857D0}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Nichelson.Test", "Nichelson.Test\Nichelson.Test.fsproj", "{0D1DEC84-807D-4972-A111-69F7F3D857D0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

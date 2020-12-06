@@ -1,5 +1,5 @@
 [<RequireQualifiedAccess>]
-module Bender.Michelson.Encoder
+module Nichelson.Encoder
 
 
 open System

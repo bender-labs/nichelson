@@ -1,11 +1,11 @@
-namespace Michelson.Test
+namespace Nichelson.Test
 
-open Bender.Michelson.Contract
-open Bender.Michelson.Contract.Arg
+open Nichelson.Contract
+open Nichelson.Contract.Arg
 
 module ``End to end`` =
 
-    open Bender.Michelson
+    open Nichelson
     open Xunit
     open FsUnit.Xunit
 

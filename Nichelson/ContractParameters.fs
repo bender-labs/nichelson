@@ -1,6 +1,6 @@
-namespace Bender.Michelson.Contract
+namespace Nichelson.Contract
 
-open Bender.Michelson
+open Nichelson
 
 
 type Arg =
@@ -167,7 +167,7 @@ type ContractParameters(typeExpression) =
                 (BytesLiteral(s |> Signature.FromString |> Signature.ToBytes), v)
             | { Prim = T_Signature }, Value (Signature s) -> (BytesLiteral(s |> Signature.ToBytes), v)
             | { Prim = T_ChainId }, Value (String s) -> (BytesLiteral (ChainId.toBytes s), v)
-            | _, _ as arg ->
+            | _, _ ->
                 failwith (sprintf "Bad parameters. \nPrim: %s \nParams:  %s" (prim.ToString()) (v.ToString()))
 
         let consume loop (expr: PrimExpression) (values: Arg) =

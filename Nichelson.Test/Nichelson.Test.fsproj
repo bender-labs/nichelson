@@ -12,7 +12,7 @@
     <Compile Include="Signature.Test.fs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Michelson\Michelson.fsproj" />
+    <ProjectReference Include="..\Nichelson\Nichelson.fsproj" />
   </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>
