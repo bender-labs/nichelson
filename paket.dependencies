@@ -5,3 +5,4 @@ nuget FSharp.Core
 nuget FsUnit.xUnit 4.0.1
 nuget Microsoft.NET.Test.Sdk 16.7.1
 nuget Netezos.Forge 1.0.1
+nuget xunit.runner.visualstudio
