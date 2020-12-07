@@ -15,8 +15,6 @@ Follow [this instructions](https://docs.github.com/en/free-pro-team@latest/packa
 
 ## Publishing a version
 
-`dotnet build -c Release`
-
-`dotnet paket pack nugets`
+`dotnet pack -c Release --include-symbols -o nugets -p:PackageVersion="0.0.4"`
 
 `dotnet nuget push nugets/Nichelson.{version}.nupkg --source <the source you configured>`
