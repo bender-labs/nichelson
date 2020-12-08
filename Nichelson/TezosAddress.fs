@@ -79,6 +79,7 @@ module TezosAddress =
         | KT1 ->
             Array.concat [ prefix
                            withoutPrefix
+                           [| 0uy |]
                            ep
-                           [| 0uy |] ]
+                            ]
         | _ -> Array.concat [ prefix; withoutPrefix ; ep ]
