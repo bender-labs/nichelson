@@ -25,12 +25,17 @@ module Arg =
 
     let Rec v = Record v
 
-    let LeftArg v = v |> Left |> Either
+    let LeftArg = Left >> Either
 
-    let RightArg v = v |> Right |> Either
-
-    let IntArg v = v |> Int |> Arg.Value
-    let StringArg v = v |> String |> Arg.Value
+    let RightArg = Right >> Either
+    
+    let IntArg = Int >> Arg.Value
+    
+    let StringArg = String >> Arg.Value
+    
+    let SignatureArg = Signature >> Arg.Value
+    
+    let AddressArg = Address >> Arg.Value
 
     let Find (fields: (string * Arg) list) key =
         let r =
@@ -61,8 +66,6 @@ module private EntryPoint =
           Path = path }
 
 type ContractParameters(typeExpression) =
-
-    let record (p: PrimExpression) = ()
 
     let entryPoints =
         let rec lookup (s: {| Locations: Map<string, EntryPoint>
@@ -105,7 +108,7 @@ type ContractParameters(typeExpression) =
             .Locations
 
 
-    let instantiateWithArg t (values: Arg) =
+    let instantiate t (values: Arg) =
 
         let exploreLeftOrRight routes args loop =
             let (left, right) = routes
@@ -166,9 +169,8 @@ type ContractParameters(typeExpression) =
             | { Prim = T_Signature }, Value (String s) ->
                 (BytesLiteral(s |> Signature.FromString |> Signature.ToBytes), v)
             | { Prim = T_Signature }, Value (Signature s) -> (BytesLiteral(s |> Signature.ToBytes), v)
-            | { Prim = T_ChainId }, Value (String s) -> (BytesLiteral (ChainId.toBytes s), v)
-            | _, _ ->
-                failwith (sprintf "Bad parameters. \nPrim: %s \nParams:  %s" (prim.ToString()) (v.ToString()))
+            | { Prim = T_ChainId }, Value (String s) -> (BytesLiteral(ChainId.toBytes s), v)
+            | _, _ -> failwith (sprintf "Bad parameters. \nPrim: %s \nParams:  %s" (prim.ToString()) (v.ToString()))
 
         let consume loop (expr: PrimExpression) (values: Arg) =
             match Node expr, values with
@@ -176,7 +178,6 @@ type ContractParameters(typeExpression) =
                 let (i, _) = instantiate loop expr head
                 (i, Tuple tail)
             | _, _ -> instantiate loop expr values
-
 
         let rec loop (expr: Expr) (args: Arg) =
             match expr, args with
@@ -193,11 +194,11 @@ type ContractParameters(typeExpression) =
 
     new(michelson) = ContractParameters(Parameters.fromMichelson michelson)
 
-    member this.Instantiate(args: Arg) = instantiateWithArg typeExpression args
+    member this.Instantiate(args: Arg) = instantiate typeExpression args
 
     member this.Instantiate(entryPoint, args: Arg) =
         let ep = this.Find(entryPoint)
-        let result = instantiateWithArg ep.Expression args
+        let result = instantiate ep.Expression args
         List.foldBack (fun p e -> Node(PrimExpression.Create(p, args = e))) ep.Path result
 
     member this.Find(annotation) = entryPoints.[annotation]
