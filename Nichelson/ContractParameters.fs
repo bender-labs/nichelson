@@ -23,7 +23,7 @@ and Value =
 
 module Arg =
 
-    let Rec v = Record v
+    let Rec = Record 
 
     let LeftArg = Left >> Either
 
@@ -120,7 +120,7 @@ type ContractParameters(typeExpression) =
                 let (rightValue, next) = loop right args
                 (Node(PrimExpression.Create(D_Right, args = rightValue)), next)
 
-        let instantiate loop prim v =
+        let instantiatePrim loop prim v =
             match prim, v with
             | { Prim = T_Pair; Args = Seq (args) }, _ ->
                 let (next, i) =
@@ -175,9 +175,9 @@ type ContractParameters(typeExpression) =
         let consume loop (expr: PrimExpression) (values: Arg) =
             match Node expr, values with
             | Primitive _, Tuple (head :: tail) ->
-                let (i, _) = instantiate loop expr head
+                let (i, _) = instantiatePrim loop expr head
                 (i, Tuple tail)
-            | _, _ -> instantiate loop expr values
+            | _, _ -> instantiatePrim loop expr values
 
         let rec loop (expr: Expr) (args: Arg) =
             match expr, args with

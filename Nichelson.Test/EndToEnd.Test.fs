@@ -62,13 +62,45 @@ module ``End to end`` =
                                Rec [ ("%amount", IntArg 100L)
                                      ("%owner", StringArg "tz1exrEuATYhFmVSXhkCkkFzY72T75hpsthj")
                                      ("%token_id", StringArg "token")
-                                     ("%tx_id", StringArg "tx")
-                                      ])
-                              ("%target", StringArg "KT1MUrrpFyjy8tu3udaRk74uA1Je7q6iftTZ")
-                         ])
+                                     ("%tx_id", StringArg "tx") ])
+                              ("%target", StringArg "KT1MUrrpFyjy8tu3udaRk74uA1Je7q6iftTZ") ])
                        ("%counter", IntArg 10L)
                        ("%signatures",
                         List [ Tuple [ StringArg "signer_id"
-                                       StringArg "edsigtfKWaNLGaSC4kdXitkgS9rrcniWdR2NTuUJG8ubVXKLMyi8ZUvem2A38CXZaYdfBbSxY1gEHLkoqHZ9EBunHSq1zZz9t11" ] ]) ])
+                                       StringArg
+                                           "edsigtfKWaNLGaSC4kdXitkgS9rrcniWdR2NTuUJG8ubVXKLMyi8ZUvem2A38CXZaYdfBbSxY1gEHLkoqHZ9EBunHSq1zZz9t11" ] ]) ])
 
         parameterType |> should not' (equal null)
+
+    [<Fact>]
+    let ``Multisig signed payload`` () =
+        let v = "(pair
+                    (pair chain_id address)
+                    (pair nat
+                        (or
+                            (unit %change_keys)
+                            (pair %signer_operation
+                                (or
+                                    (unit %add_token)
+                                    (pair %mint_token
+                                        (pair (nat %amount) (address %owner))
+                                        (pair (string %token_id) (string %tx_id))))
+                                (address %target)))))"
+        let contract = ContractParameters v
+
+        let mint =
+            Rec [ ("%amount", IntArg 100L)
+                  ("%owner", StringArg "tz1S792fHX5rvs6GYP49S1U58isZkp2bNmn6")
+                  ("%token_id", StringArg "tokenId")
+                  ("%tx_id", StringArg "txId") ]
+
+        let value =
+            contract.Instantiate
+                (Tuple [ StringArg "NetXm8tYqnMWky1"
+                         StringArg "KT1Qv5H58Hsr877Rvy3DDqn1fVVAGGxCtwp2"
+                         IntArg 0L
+                         Rec [ ("%signer_operation",
+                                   Rec [ ("%mint_token", mint)
+                                         ("%target", StringArg "KT1Qv5H58Hsr877Rvy3DDqn1fVVAGGxCtwp2") ]) ] ])
+
+        value |> should not' (equal null)
