@@ -22,19 +22,18 @@ and Value =
 
 
 module Arg =
-
-    let Rec = Record 
+    let Rec = Record
 
     let LeftArg = Left >> Either
 
     let RightArg = Right >> Either
-    
+
     let IntArg = Int >> Arg.Value
-    
+
     let StringArg = String >> Arg.Value
-    
+
     let SignatureArg = Signature >> Arg.Value
-    
+
     let AddressArg = Address >> Arg.Value
 
     let Find (fields: (string * Arg) list) key =
@@ -49,9 +48,6 @@ type Values =
     | Named of Map<string, obj>
     | Unnamed of obj list
 
-type Or =
-    | Left = 0
-    | Right = 1
 
 type EntryPoint =
     { Name: string

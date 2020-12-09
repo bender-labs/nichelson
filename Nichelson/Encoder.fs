@@ -106,8 +106,10 @@ let pack (expr: Expr) =
         | Seq elements ->
             acc.Add(0x02uy)
             let arrayBytes = List<byte>()
+
             elements
             |> Seq.iter (fun x -> loop (arrayBytes) x |> ignore)
+
             let bytes = arrayBytes |> Seq.toArray |> encodeArray
             acc.AddRange(bytes)
             acc
@@ -116,11 +118,10 @@ let pack (expr: Expr) =
 
     (loop res expr).ToArray()
 
-let byteToHex bytes =
-    bytes
-    |> Array.map (fun (x: byte) -> String.Format("{0:x2}", x))
-    |> String.concat String.Empty
-    |> (fun s -> "0x" + s)
+let byteToHex =
+    Array.map (fun (x: byte) -> String.Format("{0:x2}", x))
+    >> String.concat String.Empty
+    >> (+) "0x"
 
 
 let hexToBytes str =
@@ -128,6 +129,6 @@ let hexToBytes str =
     |> Seq.skip 2
     |> Seq.windowed 2
     |> Seq.mapi (fun i j -> (i, j))
-    |> Seq.filter (fun (i, j) -> i % 2 = 0)
+    |> Seq.filter (fun (i, _) -> i % 2 = 0)
     |> Seq.map (fun (_, j) -> Byte.Parse(String(j), System.Globalization.NumberStyles.AllowHexSpecifier))
     |> Array.ofSeq
