@@ -30,7 +30,7 @@ module ``End to end`` =
         let parameters =
             parameterType
                 .Only("%mint")
-                .Instantiate(Tuple [ IntArg 10L
+                .Instantiate(Tuple [ IntArg 10I
                                      StringArg "tz1exrEuATYhFmVSXhkCkkFzY72T75hpsthj%mint"
                                      StringArg "ethContract"
                                      StringArg "ethTxId" ])
@@ -59,12 +59,12 @@ module ``End to end`` =
             parameterType.Instantiate
                 (Rec [ ("%action",
                         Rec [ ("%invoke",
-                               Rec [ ("%amount", IntArg 100L)
+                               Rec [ ("%amount", IntArg 100I)
                                      ("%owner", StringArg "tz1exrEuATYhFmVSXhkCkkFzY72T75hpsthj")
                                      ("%token_id", StringArg "token")
                                      ("%tx_id", StringArg "tx") ])
                               ("%target", StringArg "KT1MUrrpFyjy8tu3udaRk74uA1Je7q6iftTZ") ])
-                       ("%counter", IntArg 10L)
+                       ("%counter", IntArg 10I)
                        ("%signatures",
                         List [ Tuple [ StringArg "signer_id"
                                        StringArg
@@ -89,7 +89,7 @@ module ``End to end`` =
         let contract = ContractParameters v
 
         let mint =
-            Rec [ ("%amount", IntArg 100L)
+            Rec [ ("%amount", IntArg 100I)
                   ("%owner", StringArg "tz1S792fHX5rvs6GYP49S1U58isZkp2bNmn6")
                   ("%token_id", StringArg "tokenId")
                   ("%tx_id", StringArg "txId") ]
@@ -98,7 +98,7 @@ module ``End to end`` =
             contract.Instantiate
                 (Tuple [ StringArg "NetXm8tYqnMWky1"
                          StringArg "KT1Qv5H58Hsr877Rvy3DDqn1fVVAGGxCtwp2"
-                         IntArg 0L
+                         IntArg 0I
                          Rec [ ("%signer_operation",
                                    Rec [ ("%mint_token", mint)
                                          ("%target", StringArg "KT1Qv5H58Hsr877Rvy3DDqn1fVVAGGxCtwp2") ]) ] ])

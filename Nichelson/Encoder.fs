@@ -4,6 +4,7 @@ module Nichelson.Encoder
 
 open System
 open System.Collections.Generic
+open System.Numerics
 open System.Text
 
 let private primTags =
@@ -21,10 +22,21 @@ let private lenTags =
 let private toLittleEndian b =
     if (BitConverter.IsLittleEndian) then b |> Array.rev else b
 
-let private forgeInt (value: int64) =
+let private bigintToDigits b source =
+    let rec loop (b : int) num digits =
+        let (quotient, remainder) = bigint.DivRem(num, bigint b)
+        match quotient with
+        | zero when zero = 0I -> int remainder :: digits
+        | _ -> loop b quotient (int remainder :: digits)
+    loop b source []
 
+let private digitsToString source =
+    source
+    |> List.map (fun (x : int) -> x.ToString("X").ToLowerInvariant())
+    |> String.concat ""
 
-    let mutable binary = Convert.ToString(Math.Abs(value), 2)
+let private forgeInt (value: bigint) =
+    let mutable binary = value |> bigint.Abs |> bigintToDigits 2 |> digitsToString
 
     let pad =
         if ((binary.Length - 6) % 7 = 0) then binary.Length
@@ -39,7 +51,7 @@ let private forgeInt (value: int64) =
         septets.Add(binary.Substring(7 * i, Math.Min(7, pad - 7 * i)))
 
     septets.Reverse()
-    septets.[0] <- (if value >= 0L then "0" else "1") + septets.[0]
+    septets.[0] <- (if value >= 0I then "0" else "1") + septets.[0]
 
     let res = List<byte>()
 

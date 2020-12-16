@@ -33,7 +33,7 @@ module ``Contract test`` =
         let contract = ContractParameters "(nat %amount)"
 
         let expression =
-            contract.Instantiate("%amount", IntArg 10L)
+            contract.Instantiate("%amount", IntArg 10I)
 
         expression
         |> should equal (Expression.fromMichelson ("10"))
@@ -44,7 +44,7 @@ module ``Contract test`` =
 
 
         let expression =
-            contract.Instantiate(Rec([ ("%amount", IntArg 10L) ]))
+            contract.Instantiate(Rec([ ("%amount", IntArg 10I) ]))
 
         expression
         |> should equal (Expression.fromMichelson ("10"))
@@ -55,7 +55,7 @@ module ``Contract test`` =
             ContractParameters "(pair %ep (nat %amount) (string %id))"
 
         let expression =
-            contract.Instantiate("%ep", Tuple [ IntArg 10L; StringArg "id" ])
+            contract.Instantiate("%ep", Tuple [ IntArg 10I; StringArg "id" ])
 
         expression
         |> should equal (Expression.fromMichelson (@"Pair 10 ""id"""))
@@ -68,7 +68,7 @@ module ``Contract test`` =
         let expression =
             contract.Instantiate
                 ("%ep",
-                 Rec [ ("%amount", IntArg 10L)
+                 Rec [ ("%amount", IntArg 10I)
                        ("%id", StringArg "id") ])
 
         expression
@@ -82,7 +82,7 @@ module ``Contract test`` =
         let expression =
             contract.Instantiate
                 ("%ep",
-                 Rec [ ("%amount", IntArg 10L)
+                 Rec [ ("%amount", IntArg 10I)
                        ("%id", StringArg "id") ])
 
 
@@ -96,9 +96,9 @@ module ``Contract test`` =
 
         let expression =
             contract.Instantiate
-                (Tuple [ IntArg 10L
+                (Tuple [ IntArg 10I
                          StringArg "id"
-                         IntArg 30L ])
+                         IntArg 30I ])
 
         expression
         |> should equal (Expression.fromMichelson (@"(Pair (Pair 10 ""id"") 30)"))
@@ -131,7 +131,7 @@ module ``Contract test`` =
         let contract = ContractParameters "(or nat string)"
 
         let left =
-            contract.Instantiate(LeftArg(IntArg 10L))
+            contract.Instantiate(LeftArg(IntArg 10I))
 
         let right =
             contract.Instantiate(RightArg(StringArg "toto"))
@@ -153,7 +153,7 @@ module ``Contract test`` =
             contract.Instantiate(Rec [ ("%action", Rec [ ("%change_keys", StringArg "toto") ]) ])
 
         let right =
-            contract.Instantiate(Rec [ ("%action", Rec [ ("%amount", IntArg 10L) ]) ])
+            contract.Instantiate(Rec [ ("%action", Rec [ ("%amount", IntArg 10I) ]) ])
 
         left
         |> should equal (Expression.fromMichelson @"(Left ""toto"")")
@@ -165,7 +165,7 @@ module ``Contract test`` =
     let ``Should instantiate list`` () =
         let contract = ContractParameters "(list nat)"
 
-        let result= contract.Instantiate(List [ IntArg 10L; IntArg 20L ])
+        let result= contract.Instantiate(List [ IntArg 10I; IntArg 20I ])
         
         let expected = Expression.fromMichelson "{10;20}"
         result |> should equal (expected)

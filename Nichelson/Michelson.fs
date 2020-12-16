@@ -25,7 +25,7 @@ type PrimExpression =
           Annotations = defaultArg annotation [] }
 
 and Expr =
-    | IntLiteral of int64
+    | IntLiteral of bigint
     | StringLiteral of string
     | BytesLiteral of byte array
     | Node of PrimExpression

@@ -15,7 +15,7 @@ and Either =
     | Right of Arg
 
 and Value =
-    | Int of int64
+    | Int of bigint
     | String of string
     | Address of TezosAddress.T
     | Signature of Signature.T

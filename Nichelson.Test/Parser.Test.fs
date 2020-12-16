@@ -165,7 +165,7 @@ module ``Parser Test`` =
         let ``Should parse int`` () =
             let result = parse "32"
 
-            result |> should equal (Expr.IntLiteral 32L)
+            result |> should equal (Expr.IntLiteral 32I)
 
         [<Fact>]
         let ``Should parse String`` () =
@@ -180,7 +180,7 @@ module ``Parser Test`` =
             result
             |> should
                 equal
-                   (Expr.Node(PrimExpression.Create(Prim.D_Pair, args = Seq [ IntLiteral 32L; IntLiteral 43L ])))
+                   (Expr.Node(PrimExpression.Create(Prim.D_Pair, args = Seq [ IntLiteral 32I; IntLiteral 43I ])))
 
         [<Fact>]
         let ``Should parse nested Pair`` () =
@@ -195,7 +195,7 @@ module ``Parser Test`` =
                             args =
                                 Seq [ Node
                                           (PrimExpression.Create
-                                              (Prim.D_Pair, args = Seq [ IntLiteral 32L; IntLiteral 43L ]))
+                                              (Prim.D_Pair, args = Seq [ IntLiteral 32I; IntLiteral 43I ]))
                                       StringLiteral "2" ])))
 
         [<Fact>]
@@ -207,7 +207,7 @@ module ``Parser Test`` =
                 equal
                    (Expr.Node
                        (PrimExpression.Create
-                           (Prim.D_Left, args = IntLiteral 42L
+                           (Prim.D_Left, args = IntLiteral 42I
 
                            )))
 
@@ -216,7 +216,7 @@ module ``Parser Test`` =
             let result = parse "(Right 42)"
 
             result
-            |> should equal (Expr.Node(PrimExpression.Create(Prim.D_Right, args = IntLiteral 42L)))
+            |> should equal (Expr.Node(PrimExpression.Create(Prim.D_Right, args = IntLiteral 42I)))
 
         [<Fact>]
         let ``Should parse binary`` () =
@@ -233,4 +233,4 @@ module ``Parser Test`` =
             let result = parse "{10;4}"
 
             result
-            |> should equal (Seq [ IntLiteral 10L; IntLiteral 4L ])
+            |> should equal (Seq [ IntLiteral 10I; IntLiteral 4I ])
