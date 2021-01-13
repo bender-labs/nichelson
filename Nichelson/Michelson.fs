@@ -84,6 +84,7 @@ module Expr =
             | T_Address
             | T_ChainId
             | T_Or
+            | T_Bytes
             | T_Signature -> Some(v)
             | _ -> None
         | _ -> None
