@@ -64,12 +64,6 @@ let private forgeInt (value: bigint) =
     res.ToArray()
 
 
-let private encodeInt (v: int64) =
-    match v with
-    | _ when (v <= int64 (Int16.MaxValue)) -> BitConverter.GetBytes(int16 (v)) |> toLittleEndian
-    | _ when (v <= int64 (Int32.MaxValue)) -> BitConverter.GetBytes(int32 (v)) |> toLittleEndian
-    | _ -> BitConverter.GetBytes(v) |> toLittleEndian
-
 let private encodeArray (array: byte []) =
     let length =
         BitConverter.GetBytes(array.Length)

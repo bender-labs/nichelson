@@ -56,6 +56,8 @@ module Parameters =
 
     let private tString = noArg "string" T_String
     
+    let private tBytes = noArg "bytes" T_Bytes
+    
     let private tSignature = noArg "signature" T_Signature
     
     let private tChainId = noArg "chain_id" T_ChainId
@@ -78,6 +80,7 @@ module Parameters =
                  tString
                  tSignature
                  tChainId
+                 tBytes
                  tUnit ]
 
     let private primBetweenParen = between openParen closingParen prim

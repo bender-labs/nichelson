@@ -17,6 +17,7 @@ and Either =
 and Value =
     | Int of bigint
     | String of string
+    | Bytes of byte array
     | Address of TezosAddress.T
     | Signature of Signature.T
 
@@ -32,6 +33,8 @@ module Arg =
 
     let StringArg = String >> Arg.Value
 
+    let BytesArg = Bytes >> Arg.Value
+    
     let SignatureArg = Signature >> Arg.Value
 
     let AddressArg = Address >> Arg.Value
@@ -154,6 +157,8 @@ type ContractParameters(typeExpression) =
                 let (r, _) = exploreLeftOrRight (left, right) v loop
                 (r, v)
             | { Prim = T_String }, Value (String s) -> (StringLiteral s, v)
+            | { Prim = T_Bytes }, Value (Bytes b) -> (BytesLiteral b, v)
+            | { Prim = T_Bytes }, Value (String s) -> (BytesLiteral (Encoder.hexToBytes s), v)
             | { Prim = T_Nat }, Value (Int i) -> (IntLiteral i, v)
             | { Prim = T_Address }, Value (String s) ->
                 ((BytesLiteral

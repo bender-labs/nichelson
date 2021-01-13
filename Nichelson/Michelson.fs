@@ -10,6 +10,7 @@ type Prim =
     | T_Address
     | T_Signature
     | T_ChainId
+    | T_Bytes
     | T_List
     | D_Pair
     | D_Right

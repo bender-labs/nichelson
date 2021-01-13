@@ -57,6 +57,13 @@ module ``Parser Test`` =
 
                 expr
                 |> should equal (PrimExpression.Create T_ChainId)
+                
+            [<Fact>]
+            let ``Should parse bytes``() =
+                let expr = parse "bytes"
+
+                expr
+                |> should equal (PrimExpression.Create T_Bytes)                
 
         type Pair() =
 

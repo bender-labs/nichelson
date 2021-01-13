@@ -169,3 +169,22 @@ module ``Contract test`` =
         
         let expected = Expression.fromMichelson "{10;20}"
         result |> should equal (expected)
+
+    [<Fact>]
+    let ``Should instantiate bytes`` () =
+        let bytes = [|255uy;250uy|]
+        let contract = ContractParameters "bytes"
+
+        let result= contract.Instantiate(BytesArg bytes)
+        
+        let expected = Expression.fromMichelson "0xfffa"
+        result |> should equal (expected)
+
+    [<Fact>]
+    let ``Should instantiate bytes from string`` () =
+        let contract = ContractParameters "bytes"
+
+        let result= contract.Instantiate(StringArg "0xff")
+        
+        let expected = Expression.fromMichelson "0xff"
+        result |> should equal (expected)
