@@ -20,6 +20,15 @@ module ``Address test`` =
                   EntryPoint = None }: TezosAddress.T)
         let base58 = v |> TezosAddress.ToBytes |> Encoder.byteToHex
         base58.ToLower() |> should equal "0x0000d3f99177aa262227a65b344416f85de34bf21420"
+        TezosAddress.Value (v) |> should equal "tz1exrEuATYhFmVSXhkCkkFzY72T75hpsthj"
+    
+    [<Fact>]
+    let ``Should create from bytes``() =
+        let raw = Encoder.hexToBytes "0x0000d3f99177aa262227a65b344416f85de34bf21420"
+        
+        let v = TezosAddress.FromBytes raw
+        
+        TezosAddress.Value v |> should equal "tz1exrEuATYhFmVSXhkCkkFzY72T75hpsthj"
     
     [<Fact>]
     let ``Should parse kt`` () =
@@ -32,14 +41,21 @@ module ``Address test`` =
                ({ Type = KT1
                   Value = "KT1Bgn8rVGKEDh7sGT2mUBXPHd7XWqibrMxD"
                   EntryPoint = None }: TezosAddress.T)
-        let base58 = v |> TezosAddress.ToBytes |> Encoder.byteToHex
-        base58.ToLower() |> should equal "0x01220b596ec28379091378e9ba5e4c95fb8f5b243500"
+        let hex = v |> TezosAddress.ToBytes |> Encoder.byteToHex
+        hex.ToLower() |> should equal "0x01220b596ec28379091378e9ba5e4c95fb8f5b243500"
+        
+    [<Fact>]
+    let ``Should import kt1 from bytes``() =
+        let v = TezosAddress.FromBytes ("0x01220b596ec28379091378e9ba5e4c95fb8f5b243500" |> Encoder.hexToBytes)
+        
+        TezosAddress.Value v |> should equal "KT1Bgn8rVGKEDh7sGT2mUBXPHd7XWqibrMxD" 
         
     [<Fact>]
     let ``Should include ep``() =
         let v =
             TezosAddress.FromString "tz1exrEuATYhFmVSXhkCkkFzY72T75hpsthj%mint"
         let base58 = v |> TezosAddress.ToBytes |> Encoder.byteToHex
+        
         base58.ToLower() |> should equal "0x0000d3f99177aa262227a65b344416f85de34bf214206d696e74"
 
     [<Fact>]

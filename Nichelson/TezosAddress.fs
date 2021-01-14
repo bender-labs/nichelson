@@ -4,7 +4,6 @@ open System
 open System.Text
 open System.Text.RegularExpressions
 
-
 type AddressType =
     | KT1
     | TZ1
@@ -50,10 +49,9 @@ module TezosAddress =
                 | "tz3" -> TZ3
                 | _ -> failwith "Unknown address type"
 
-            Some(prefix,m.Groups.[1].Value +  m.Groups.[2].Value, m.Groups.[3].Value)
+            Some(prefix, m.Groups.[1].Value + m.Groups.[2].Value, m.Groups.[3].Value)
         else
             None
-
 
     let FromString (str: string) =
         match str with
@@ -63,23 +61,46 @@ module TezosAddress =
               EntryPoint = if String.IsNullOrEmpty ep then None else Some ep }
         | _ -> failwith "Invalid address"
 
-    let Value (addr: T) = prefixAsString.[addr.Type] + addr.Value
+    let FromBytes (value: byte array) =
+        match value |> Array.toList with
+        | h :: _ when h = 1uy ->
+            { Type = KT1
+              Value = Base58.Convert(value.[1..value.Length-2], [| 2uy; 90uy; 121uy |])
+              EntryPoint = None }
+        | first :: (second :: _) when first = 0uy && second = 0uy ->
+            { Type = TZ1
+              Value = Base58.Convert(value.[2..], [| 6uy; 161uy; 159uy |])
+              EntryPoint = None }
+        | first :: (second :: _) when first = 0uy && second = 1uy ->
+            { Type = TZ2
+              Value = Base58.Convert(value.[2..], [| 6uy; 161uy; 161uy |])
+              EntryPoint = None }
+        | first :: (second :: _) when first = 0uy && second = 2uy ->
+            { Type = TZ3
+              Value = Base58.Convert(value.[2..], [| 6uy; 161uy; 164uy |])
+              EntryPoint = None }
+        | _ -> failwith "todo"
+
+    let Value ({ Value = v }: T) = v
 
     let ToBytes (addr: T) =
         let full = Base58.Parse(addr.Value)
         let prefix = base58Tags.[addr.Type]
         let withoutPrefix = Array.zeroCreate (full.Length - 3)
         Buffer.BlockCopy(full, 3, withoutPrefix, 0, full.Length - 3)
+
         let ep =
             match addr.EntryPoint with
-            | Some v-> Encoding.UTF8.GetBytes(v)
+            | Some v -> Encoding.UTF8.GetBytes(v)
             | None -> [||]
-            
+
         match addr.Type with
         | KT1 ->
             Array.concat [ prefix
                            withoutPrefix
                            [| 0uy |]
-                           ep
-                            ]
-        | _ -> Array.concat [ prefix; withoutPrefix ; ep ]
+                           ep ]
+        | _ ->
+            Array.concat [ prefix
+                           withoutPrefix
+                           ep ]
