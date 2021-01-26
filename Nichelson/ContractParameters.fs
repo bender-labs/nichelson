@@ -78,8 +78,8 @@ module private Extract =
             | Node { Prim = T_Pair; Args = (Seq args) }, Node { Prim = D_Pair; Args = (Seq values) } ->
                 Seq.zip args values
                 |> Seq.map (fun (x, y) -> walk x y)
-                |> Seq.find (fun e -> e.IsSome)
-
+                |> Seq.tryFind (fun e -> e.IsSome)
+                |> Option.flatten
             | _ -> None
 
         walk ep value

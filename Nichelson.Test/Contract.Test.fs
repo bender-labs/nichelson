@@ -222,3 +222,13 @@ module ``Contract test`` =
             contract.Extract("%amount", Expression.load "(Pair 100 50)")
 
         result |> should equal 100I
+
+    [<Fact>]
+    let ``Should extract nested pair``() =
+        let contract = ContractParameters "(pair (pair (nat %amount) (bytes %destination))
+                          (pair (nat %fees) (bytes %token_id)))"
+                          
+        let result: BigInteger =
+            contract.Extract("%fees", Expression.load "(Pair (Pair 100 0x50) (Pair 10 0x40))")
+            
+        result |> should equal 10I            
