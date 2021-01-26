@@ -1,6 +1,7 @@
 namespace Nichelson.Test
 
 open Nichelson
+open Nichelson.Parser.Michelson
 
 module ``Encoder test`` =
 
@@ -8,7 +9,7 @@ module ``Encoder test`` =
     open Xunit
 
     let pack v =
-        Encoder.pack (Expression.fromMichelson v)
+        Encoder.pack (Expression.load v)
 
     [<Fact>]
     let ``Should encode int`` () =

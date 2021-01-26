@@ -1,6 +1,7 @@
 namespace Nichelson.Test
 
 open Nichelson
+open Nichelson.Parser.Michelson
 
 module ``Parser Test`` =
     open Xunit

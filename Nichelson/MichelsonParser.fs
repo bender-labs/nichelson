@@ -1,6 +1,6 @@
 [<AutoOpen>]
-module Nichelson.Parser
-
+module Nichelson.Parser.Michelson
+open Nichelson
 open System.Numerics
 open FParsec
 
@@ -89,7 +89,7 @@ module Parameters =
 
     let parse = prims .>> eof
 
-    let fromMichelson michelson =
+    let load michelson =
         let p = run parse michelson
 
         match p with
@@ -151,7 +151,7 @@ module Expression =
 
     let parse = values .>> eof
 
-    let fromMichelson michelson =
+    let load michelson =
         let p = run parse michelson
 
         match p with

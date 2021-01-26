@@ -1,7 +1,7 @@
 namespace Nichelson.Contract
 
 open Nichelson
-
+open Nichelson.Parser.Michelson
 
 type Arg =
     | Record of (string * Arg) list
@@ -34,7 +34,7 @@ module Arg =
     let StringArg = String >> Arg.Value
 
     let BytesArg = Bytes >> Arg.Value
-    
+
     let SignatureArg = Signature >> Arg.Value
 
     let AddressArg = Address >> Arg.Value
@@ -63,6 +63,26 @@ module private EntryPoint =
         { Name = name
           Expression = { expr with Annotations = [] }
           Path = path }
+
+module private Extract =
+
+    let cast (value: Expr): 'v =
+        match value with
+        | IntLiteral v -> v |> Unchecked.unbox<'v>
+        | BytesLiteral v -> v |> Unchecked.unbox<'v>
+
+    let extract (annot: string) (ep: Expr) (value: Expr): 'v option =
+        let rec walk (p: Expr) (v: Expr) =
+            match p, v with
+            | Node { Annotations = annotations }, _ when annotations |> List.contains annot -> Some(cast v)
+            | Node { Prim = T_Pair; Args = (Seq args) }, Node { Prim = D_Pair; Args = (Seq values) } ->
+                Seq.zip args values
+                |> Seq.map (fun (x, y) -> walk x y)
+                |> Seq.find (fun e -> e.IsSome)
+
+            | _ -> None
+
+        walk ep value
 
 type ContractParameters(typeExpression) =
 
@@ -105,7 +125,6 @@ type ContractParameters(typeExpression) =
 
         (lookup {| Locations = Map.empty; Path = [] |} (Node typeExpression))
             .Locations
-
 
     let instantiate t (values: Arg) =
 
@@ -158,7 +177,7 @@ type ContractParameters(typeExpression) =
                 (r, v)
             | { Prim = T_String }, Value (String s) -> (StringLiteral s, v)
             | { Prim = T_Bytes }, Value (Bytes b) -> (BytesLiteral b, v)
-            | { Prim = T_Bytes }, Value (String s) -> (BytesLiteral (Encoder.hexToBytes s), v)
+            | { Prim = T_Bytes }, Value (String s) -> (BytesLiteral(Encoder.hexToBytes s), v)
             | { Prim = T_Nat }, Value (Int i) -> (IntLiteral i, v)
             | { Prim = T_Address }, Value (String s) ->
                 ((BytesLiteral
@@ -193,7 +212,7 @@ type ContractParameters(typeExpression) =
         let (expr, _) = loop (Node t) values
         expr
 
-    new(michelson) = ContractParameters(Parameters.fromMichelson michelson)
+    new(michelson) = ContractParameters(Parameters.load michelson)
 
     member this.Instantiate(args: Arg) = instantiate typeExpression args
 
@@ -206,3 +225,8 @@ type ContractParameters(typeExpression) =
 
     member this.Only(annotation) =
         ContractParameters(this.Find(annotation).Expression)
+
+    member this.Extract(annotation: string, value: Expr) =
+        match Extract.extract annotation (Node typeExpression) value with
+        | Some v -> v
+        | None -> failwith "Value not found"
