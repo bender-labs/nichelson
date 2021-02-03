@@ -39,6 +39,13 @@ module ``Parser Test`` =
                 |> should equal (PrimExpression.Create(Prim.T_String, annotation = [ "%token_id" ]))
 
             [<Fact>]
+            let ``Should parse annotation with numerical chars`` () =
+                let expr = parse "(string %erc_20)"
+
+                expr
+                |> should equal (PrimExpression.Create(Prim.T_String, annotation = [ "%erc_20" ]))
+            
+            [<Fact>]
             let ``Should parse multiple annotations`` () =
                 let expr = parse "(string %token_id %other)"
 

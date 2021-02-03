@@ -1,5 +1,6 @@
 [<AutoOpen>]
 module Nichelson.Parser.Michelson
+
 open Nichelson
 open System.Numerics
 open FParsec
@@ -15,7 +16,7 @@ let private annotations: Parser<Annotation, UserState> =
     let start = anyOf "%!:$&?"
 
     let value =
-        many1Satisfy (fun c -> isLetter (c) || isAnyOf "_.%@" c)
+        many1Satisfy (fun c -> isLetter c || isDigit c || isAnyOf "_.%@" c)
 
     many
         (spaces
@@ -55,11 +56,11 @@ module Parameters =
     let private tAddress = noArg "address" T_Address
 
     let private tString = noArg "string" T_String
-    
+
     let private tBytes = noArg "bytes" T_Bytes
-    
+
     let private tSignature = noArg "signature" T_Signature
-    
+
     let private tChainId = noArg "chain_id" T_ChainId
 
     let private tList =
@@ -101,7 +102,8 @@ module Expression =
     let (private values: Parser<Expr, UserState>), (private valuesR: Parser<Expr, UserState> ref) =
         createParserForwardedToRef ()
 
-    let private intLiteral = pint64 |>> (fun v -> IntLiteral (BigInteger(v)))
+    let private intLiteral =
+        pint64 |>> (fun v -> IntLiteral(BigInteger(v)))
 
     let private stringLiteral =
         let normalCharSnippet = manySatisfy ((<>) '"')
@@ -116,10 +118,11 @@ module Expression =
 
     let private listD =
         let sep = pstring ";"
-        let elems = sepBy values sep 
+        let elems = sepBy values sep
+
         between (pstring "{") (pstring "}") elems
         |>> (Seq)
-    
+
     let private exprWithTwoArgs = nodeWithTwoArgs values
     let private exprWithOneArg = nodeWithOneArg values
 
