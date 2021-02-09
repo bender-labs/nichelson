@@ -13,6 +13,14 @@ GitHub Actions |
 [![Build History](https://buildstats.info/github/chart/bender-labs/nichelson)](https://github.com/benderlabs/nichelson/actions?query=branch%3Amaster) |
 
 
+## NuGet 
+
+Package | Stable | Prerelease
+--- | --- | ---
+MyCoolNewLib | [![NuGet Badge](https://buildstats.info/nuget/nichelson)](https://www.nuget.org/packages/nichelson/) | [![NuGet Badge](https://buildstats.info/nuget/nichelson?includePreReleases=true)](https://www.nuget.org/packages/nichelson/)
+
+---
+
 
 ## Configure nuget
 

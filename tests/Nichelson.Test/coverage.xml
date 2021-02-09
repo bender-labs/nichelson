@@ -2,10 +2,10 @@
 <CoverageSession xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <Summary numSequencePoints="354" visitedSequencePoints="293" numBranchPoints="329" visitedBranchPoints="151" sequenceCoverage="82.77" branchCoverage="45.9" maxCyclomaticComplexity="34" minCyclomaticComplexity="1" visitedClasses="66" numClasses="71" visitedMethods="107" numMethods="126" minCrapScore="1" maxCrapScore="72" />
   <Modules>
-    <Module hash="50-91-D5-21-49-E3-09-D1-1B-CB-48-6E-A5-39-75-7C-BD-EC-A9-21">
+    <Module hash="58-D4-BF-2F-0C-86-BD-CC-4B-9F-6F-C4-06-03-B6-93-AC-A8-79-31">
       <Summary numSequencePoints="354" visitedSequencePoints="293" numBranchPoints="329" visitedBranchPoints="151" sequenceCoverage="82.77" branchCoverage="45.9" maxCyclomaticComplexity="34" minCyclomaticComplexity="1" visitedClasses="66" numClasses="71" visitedMethods="107" numMethods="126" minCrapScore="1" maxCrapScore="72" />
       <ModulePath>/Users/jb/workspaces/bender/nichelson/tests/Nichelson.Test/bin/Release/net5.0/Nichelson.dll</ModulePath>
-      <ModuleTime>2021-02-09T17:50:53.557651Z</ModuleTime>
+      <ModuleTime>2021-02-09T18:03:28.2428648Z</ModuleTime>
       <ModuleName>Nichelson</ModuleName>
       <Files>
         <File uid="1" fullPath="/Users/jb/workspaces/bender/nichelson/src/Nichelson/Michelson.fs" />
@@ -2877,7 +2877,7 @@
     </Module>
     <Module skippedDueTo="Filter" hash="E7-20-FB-BC-07-3D-E9-B4-39-67-37-F4-84-EF-DA-A9-75-F3-21-79">
       <ModulePath>/Users/jb/workspaces/bender/nichelson/tests/Nichelson.Test/bin/Release/net5.0/Nichelson.Test.dll</ModulePath>
-      <ModuleTime>2021-02-09T17:51:23.8189888Z</ModuleTime>
+      <ModuleTime>2021-02-09T18:03:34.1224681Z</ModuleTime>
       <ModuleName>Nichelson.Test</ModuleName>
       <Classes />
     </Module>
