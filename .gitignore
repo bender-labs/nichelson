@@ -151,6 +151,10 @@ _TeamCity*
 # DotCover is a Code Coverage Tool
 *.dotCover
 
+# Test coverage files
+coverage.xml
+coverage.*.xml
+
 # NCrunch
 _NCrunch_*
 .*crunch*.local.xml
@@ -455,3 +459,4 @@ bower_components
 Scripts/
 
 .ionide
+dist/
