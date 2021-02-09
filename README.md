@@ -1,9 +1,17 @@
-Nichelson, for .NET Michelson.
+# Nichelson, for .NET Michelson.
 
 So far, Nichelson is an experiment to let a user parse a michelson expression to build a micheline representation in plain F#. 
 The goal would be to ease smart contracts invocation. For instance, one could parse a smart contract parameter, and then build and serialize a call, to sign it for the multisig, or call it straigh away.
 
 A full exemple can be found [here](Nichelson.Test/EndToEnd.Test.fs)
+
+## Builds
+
+GitHub Actions |
+:---: |
+[![GitHub Actions](https://github.com/bender-labs/nichelson/workflows/Build%20master/badge.svg)](https://github.com/bender-labs/nichelson/actions?query=branch%3Amaster) |
+[![Build History](https://buildstats.info/github/chart/bender-labs/nichelson)](https://github.com/benderlabs/nichelson/actions?query=branch%3Amaster) |
+
 
 
 ## Configure nuget

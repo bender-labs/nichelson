@@ -13,7 +13,7 @@
     <Compile Include="JsonParser.Test.fs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Nichelson\Nichelson.fsproj" />
+    <ProjectReference Include="..\..\src\Nichelson\Nichelson.fsproj" />
   </ItemGroup>
-  <Import Project="..\.paket\Paket.Restore.targets" />
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

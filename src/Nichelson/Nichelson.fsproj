@@ -2,13 +2,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <Company>Bender Labs</Company>
-    <Authors>Bender Labs</Authors>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <RepositoryUrl>https://github.com/bender-labs/nichelson.git</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <Optimize>true</Optimize>
+    <Tailcalls>true</Tailcalls>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AssemblyInfo.fs" />
     <Compile Include="Michelson.fs" />
     <Compile Include="Encoder.fs" />
     <Compile Include="MichelsonParser.fs" />
@@ -18,5 +18,5 @@
     <Compile Include="ChainId.fs" />
     <Compile Include="ContractParameters.fs" />
   </ItemGroup>
-  <Import Project="..\.paket\Paket.Restore.targets" />
+  <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
