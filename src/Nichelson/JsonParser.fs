@@ -7,7 +7,7 @@ open Newtonsoft.Json.Linq
 [<RequireQualifiedAccess>]
 module Expression =
 
-    type func = JToken -> Expr
+    type Func = JToken -> Expr
 
     let private instantiate (prop: JProperty) =
         match prop.Name with
@@ -19,7 +19,7 @@ module Expression =
             StringLiteral (prop.Value.Value<string>())
         | _ -> failwith "Not supported"
 
-    let private parsePrim (object: JObject) (f: func) =
+    let private parsePrim (object: JObject) (f: Func) =
         let prim = object.GetValue("prim").Value<string>()
         let args = object.GetValue("args")
 
@@ -27,7 +27,7 @@ module Expression =
         | "Pair" -> PrimExpression.Create(D_Pair, args = (f args))
         | _ -> failwith (sprintf "Prim not supported %s" prim)
 
-    let private parseObject (object: JObject) (f: func) =
+    let private parseObject (object: JObject) (f: Func) =
         if object.Count = 1 then
             object.Properties()
             |> Seq.map instantiate
@@ -36,7 +36,7 @@ module Expression =
             Node(parsePrim object f)
 
     let load (token: JToken) =
-        let rec parser: func =
+        let rec parser: Func =
             fun token ->
                 match token with
                 | :? JObject as object -> parseObject object parser
