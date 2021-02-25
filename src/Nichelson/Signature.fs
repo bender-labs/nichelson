@@ -2,7 +2,7 @@ namespace Nichelson
 
 open System
 open System.Text.RegularExpressions
-open Netezos.Forge.Utils
+open Netezos.Encoding
 
 type SignatureType =
     | Ed25519

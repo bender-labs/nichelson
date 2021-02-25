@@ -1,6 +1,6 @@
 namespace Nichelson
 
-open Netezos.Forge.Utils
+open Netezos.Encoding
 
 module ChainId =
     let toBytes =

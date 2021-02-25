@@ -3,6 +3,7 @@ namespace Nichelson
 open System
 open System.Text
 open System.Text.RegularExpressions
+open Netezos.Encoding
 
 type AddressType =
     | KT1
@@ -12,8 +13,6 @@ type AddressType =
 
 [<RequireQualifiedAccess>]
 module TezosAddress =
-
-    open Netezos.Forge.Utils
 
     type T =
         { Type: AddressType
