@@ -140,8 +140,7 @@ module ``Contract test`` =
         let right =
             contract.Instantiate(RightArg(StringArg "toto"))
 
-        left
-        |> should equal (Expression.load "(Left 10)")
+        left |> should equal (Expression.load "(Left 10)")
 
         right
         |> should equal (Expression.load @"(Right ""toto"")")
@@ -211,7 +210,9 @@ module ``Contract test`` =
 
         let result: byte array = contract.Extract("%tx_id", value)
 
-        result |> Encoder.byteToHex |> should equal "0x50fa"
+        result
+        |> Encoder.byteToHex
+        |> should equal "0x50fa"
 
     [<Fact>]
     let ``Should extract value from pair`` () =
@@ -224,11 +225,24 @@ module ``Contract test`` =
         result |> should equal 100I
 
     [<Fact>]
-    let ``Should extract nested pair``() =
-        let contract = ContractParameters "(pair (pair (nat %amount) (bytes %destination))
+    let ``Should extract nested pair`` () =
+        let contract =
+            ContractParameters "(pair (pair (nat %amount) (bytes %destination))
                           (pair (nat %fees) (bytes %token_id)))"
-                          
+
         let result: BigInteger =
             contract.Extract("%fees", Expression.load "(Pair (Pair 100 0x50) (Pair 10 0x40))")
-            
-        result |> should equal 10I            
+
+        result |> should equal 10I
+
+    [<Fact>]
+    let ``Should extract pair comb`` () =
+        let contract =
+            ContractParameters "(pair
+              (pair (nat %amount) (bytes %destination))
+              (pair (bytes %erc_20) (nat %fees)))"
+
+        let result: BigInteger =
+            contract.Extract("%fees", Expression.load "(Pair (Pair 100 0x50) 0x40 10)")
+
+        result |> should equal 10I

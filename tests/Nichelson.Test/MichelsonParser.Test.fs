@@ -44,7 +44,7 @@ module ``Parser Test`` =
 
                 expr
                 |> should equal (PrimExpression.Create(Prim.T_String, annotation = [ "%erc_20" ]))
-            
+
             [<Fact>]
             let ``Should parse multiple annotations`` () =
                 let expr = parse "(string %token_id %other)"
@@ -60,18 +60,18 @@ module ``Parser Test`` =
                 |> should equal (PrimExpression.Create T_Signature)
 
             [<Fact>]
-            let ``Should parse chain_id``() =
+            let ``Should parse chain_id`` () =
                 let expr = parse "chain_id"
 
                 expr
                 |> should equal (PrimExpression.Create T_ChainId)
-                
+
             [<Fact>]
-            let ``Should parse bytes``() =
+            let ``Should parse bytes`` () =
                 let expr = parse "bytes"
 
                 expr
-                |> should equal (PrimExpression.Create T_Bytes)                
+                |> should equal (PrimExpression.Create T_Bytes)
 
         type Pair() =
 
@@ -212,6 +212,20 @@ module ``Parser Test`` =
                                           (PrimExpression.Create
                                               (Prim.D_Pair, args = Seq [ IntLiteral 32I; IntLiteral 43I ]))
                                       StringLiteral "2" ])))
+
+
+        [<Fact>]
+        let ``Should parse  Pair comb`` () =
+            let result = parse @"(Pair 32 43 ""2"")"
+
+            let nested =
+                (PrimExpression.Create
+                    (Prim.D_Pair,
+                     args =
+                         Seq [ IntLiteral 43I
+                               StringLiteral "2" ]))
+            result
+            |> should equal (Expr.Node(PrimExpression.Create(Prim.D_Pair, args = Seq [ IntLiteral 32I; Node nested ])))
 
         [<Fact>]
         let ``Should parse Left`` () =

@@ -40,6 +40,8 @@ let private nodeWithArgs str p (parser: Parser<Expr, UserState>) =
                Args = args
                Annotations = annot }))
 
+let private nodeWithNArgs sub str p = nodeWithArgs str p (many sub |>> Seq)
+
 let private nodeWithTwoArgs sub str p =
     nodeWithArgs str p (pipe2 sub sub (fun el1 el2 -> Seq [ el1; el2 ]))
 
@@ -125,9 +127,20 @@ module Expression =
 
     let private exprWithTwoArgs = nodeWithTwoArgs values
     let private exprWithOneArg = nodeWithOneArg values
+    let private exprWithNArg = nodeWithNArgs values
 
     let private pairD =
-        exprWithTwoArgs "Pair" Prim.D_Pair |>> Node
+        let rec expend arr =
+            match arr with
+            | [ first; second ] -> PrimExpression.Create(D_Pair, args = Seq [ first; second ])
+            | head :: tail -> PrimExpression.Create(D_Pair, args = Seq [ head; Node(expend tail) ])
+            | [] -> PrimExpression.Create(D_Pair, args = Seq [])
+
+        exprWithNArg "Pair" Prim.D_Right
+        |>> (fun v ->
+            match v.Args with
+            | Seq (args) -> args |> expend |> Node
+            | _ -> Node v)
 
     let leftD =
         exprWithOneArg "Left" Prim.D_Left |>> Node

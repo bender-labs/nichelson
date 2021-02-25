@@ -46,3 +46,23 @@ let ``Should parse pair`` () =
 
     expr
     |> should equal (Node(PrimExpression.Create(D_Pair, args = args)))
+
+[<Fact>]
+let ``Should parse pair comb`` () =
+    let token =
+        JToken.Parse("""{"prim":"Pair", "args":[{"int":"5"},{"bytes":"850a"},{"int":"10"}]}""")
+
+    let expr = Expression.load token
+
+    let args =
+        Seq [ IntLiteral 5I
+              Node
+                  (PrimExpression.Create
+                      (D_Pair,
+                       args =
+                           Seq [ BytesLiteral(Encoder.hexToBytes "0x850a")
+                                 IntLiteral 10I ])) ]
+
+
+    expr
+    |> should equal (Node(PrimExpression.Create(D_Pair, args = args)))

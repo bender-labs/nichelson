@@ -53,6 +53,7 @@ module Expr =
 
         folder state expr
 
+    
     let private orArgs (Seq ([ left; right ])) = (left, right)
 
     let (|NamedOr|_|) input =
