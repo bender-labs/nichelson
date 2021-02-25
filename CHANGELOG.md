@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## Add
+### Add
 - Manages EDO's pair comb
 
 ## [0.0.17] - 2021-02-25
