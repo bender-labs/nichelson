@@ -2,11 +2,10 @@ source https://api.nuget.org/v3/index.json
 
 nuget Microsoft.SourceLink.GitHub 1.0.0 copy_local: true
 nuget altcover
-nuget FParsec 1.1.1
-nuget FSharp.Core
-nuget FsUnit.xUnit 4.0.4
-nuget Microsoft.NET.Test.Sdk 16.8.3
-nuget Netezos 2.2.1
+nuget FParsec
+nuget FsUnit.xUnit
+nuget Microsoft.NET.Test.Sdk
+nuget Netezos
 nuget xunit.runner.visualstudio
 
 // [ FAKE GROUP ]
@@ -14,18 +13,22 @@ group Build
     storage: none
     source https://www.nuget.org/api/v2
     source https://api.nuget.org/v3/index.json
-    nuget Fake.IO.FileSystem 5.20.4-alpha.1642
-    nuget Fake.Core.Target 5.20.4-alpha.1642
-    nuget Fake.Core.ReleaseNotes 5.20.4-alpha.1642
-    nuget FAKE.Core.Environment 5.20.4-alpha.1642
-    nuget Fake.DotNet.Cli 5.20.4-alpha.1642
-    nuget FAKE.Core.Process 5.20.4-alpha.1642
-    nuget Fake.DotNet.AssemblyInfoFile 5.20.4-alpha.1642
-    nuget Fake.Tools.Git 5.20.4-alpha.1642
-    nuget Fake.DotNet.Paket 5.20.4-alpha.1642
-    nuget Fake.Api.GitHub 5.20.4-alpha.1642
-    nuget Fake.BuildServer.AppVeyor 5.20.4-alpha.1642
-    nuget Fake.BuildServer.Travis 5.20.4-alpha.1642
-    nuget Fantomas
+    nuget Fake.IO.FileSystem 5.20.4
+    nuget Fake.Core.Target 5.20.4
+    nuget Fake.Core.ReleaseNotes 5.20.4
+    nuget FAKE.Core.Environment 5.20.4
+    nuget Fake.DotNet.Cli 5.20.4
+    nuget FAKE.Core.Process 5.20.4
+    nuget Fake.DotNet.AssemblyInfoFile 5.20.4
+    nuget Fake.Tools.Git 5.20.4
+    nuget Fake.DotNet.Paket 5.20.4
+    nuget Fake.Api.GitHub 5.20.4
+    nuget Fake.BuildServer.AppVeyor 5.20.4
+    nuget Fake.BuildServer.Travis 5.20.4
     nuget Argu
     nuget Fantomas.Extras
+    
+group Analyzers
+  source https://www.nuget.org/api/v2
+  source https://api.nuget.org/v3/index.json
+  nuget BinaryDefense.FSharp.Analyzers.Hashing 0.2.1
