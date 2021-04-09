@@ -1,9 +1,11 @@
 namespace Nichelson
 
 open System
+open System.Reflection.Metadata
 open System.Text
 open System.Text.RegularExpressions
 open Netezos.Encoding
+open Nichelson
 
 type AddressType =
     | KT1
@@ -52,19 +54,24 @@ module TezosAddress =
         else
             None
 
-    let FromString (str: string) =
+    let FromStringUnsafe (str: string) =
         match str with
         | ValidAddress (prefix, value, ep) ->
             { Type = prefix
               Value = value
               EntryPoint = if String.IsNullOrEmpty ep then None else Some ep }
-        | _ -> failwith "Invalid address"
+        | _ -> failwith (sprintf "Invalid address %s" str)
 
-    let FromBytes (value: byte array) =
+    let FromString (str: string) =
+        try
+            Ok(FromStringUnsafe str)
+        with ex -> Error ex.Message
+
+    let FromBytesUnsafe (value: byte array) =
         match value |> Array.toList with
         | h :: _ when h = 1uy ->
             { Type = KT1
-              Value = Base58.Convert(value.[1..value.Length-2], [| 2uy; 90uy; 121uy |])
+              Value = Base58.Convert(value.[1..value.Length - 2], [| 2uy; 90uy; 121uy |])
               EntryPoint = None }
         | first :: (second :: _) when first = 0uy && second = 0uy ->
             { Type = TZ1
@@ -78,7 +85,12 @@ module TezosAddress =
             { Type = TZ3
               Value = Base58.Convert(value.[2..], [| 6uy; 161uy; 164uy |])
               EntryPoint = None }
-        | _ -> failwith "todo"
+        | _ -> failwith (sprintf "Invalid address %s" (Encoder.byteToHex value))
+
+    let FromBytes (value: byte array) =
+        try
+            Ok(FromBytesUnsafe value)
+        with ex -> Error ex.Message
 
     let Value ({ Value = v }: T) = v
 

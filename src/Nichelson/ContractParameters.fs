@@ -182,7 +182,7 @@ type ContractParameters(typeExpression) =
             | { Prim = T_Address }, Value (String s) ->
                 ((BytesLiteral
                     (s
-                     |> TezosAddress.FromString
+                     |> TezosAddress.FromStringUnsafe
                      |> TezosAddress.ToBytes)),
                  v)
             | { Prim = T_Address }, Value (Address addr) -> (BytesLiteral(addr |> TezosAddress.ToBytes), v)
