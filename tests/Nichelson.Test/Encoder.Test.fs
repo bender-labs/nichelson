@@ -92,4 +92,9 @@ module ``Encoder test`` =
         let bytes = pack "{200;200}"
         
         (Encoder.byteToHex bytes) |> should equal "0x050200000006008803008803"
-                                  
+             
+    [<Fact>]
+    let ``Should encode nested list``() =
+        let bytes = pack "Left {200;200}"
+        
+        (Encoder.byteToHex bytes) |> should equal "0x0505050200000006008803008803"                     

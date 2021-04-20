@@ -77,16 +77,16 @@ let private encodeString (v: string) =
 
 let private encodePrim (acc: List<byte>) (v: PrimExpression) (loop: List<byte> -> Expr -> List<byte>) =
 
-    match v.Args, v.Annotations with
-    | Seq args, [] ->
+    match v.Prim, v.Args, v.Annotations with
+    | D_Pair, Seq args, [] ->
         acc.Add(lenTags.[args.Length].[false])
         acc.Add(primTags.[v.Prim])
         args |> List.fold loop acc
-    | c, [] ->
+    | _, c, [] ->
         acc.Add(lenTags.[1].[false])
         acc.Add(primTags.[v.Prim])
         loop acc c
-    | _, _ -> failwith "Not supported"
+    | _, _, _ -> failwith "Not supported"
 
 
 
