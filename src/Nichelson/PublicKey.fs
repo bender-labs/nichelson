@@ -1,7 +1,6 @@
 namespace Nichelson
 
 open System
-open System.Security.Cryptography.X509Certificates
 open System.Text.RegularExpressions
 open Netezos.Encoding
 
