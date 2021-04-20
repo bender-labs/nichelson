@@ -10,6 +10,7 @@
     <Compile Include="EndToEnd.Test.fs" />
     <Compile Include="Address.Test.fs" />
     <Compile Include="Signature.Test.fs" />
+    <Compile Include="PublicKey.Test.fs" />
     <Compile Include="JsonParser.Test.fs" />
   </ItemGroup>
   <ItemGroup>

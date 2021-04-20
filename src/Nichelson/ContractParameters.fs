@@ -20,6 +20,7 @@ and Value =
     | Bytes of byte array
     | Address of TezosAddress.T
     | Signature of Signature.T
+    | Key of PublicKey.T
 
 
 module Arg =
@@ -66,12 +67,12 @@ module private EntryPoint =
 
 module private Extract =
 
-    let cast (value: Expr): 'v =
+    let cast (value: Expr) : 'v =
         match value with
         | IntLiteral v -> v |> Unchecked.unbox<'v>
         | BytesLiteral v -> v |> Unchecked.unbox<'v>
 
-    let extract (annot: string) (ep: Expr) (value: Expr): 'v option =
+    let extract (annot: string) (ep: Expr) (value: Expr) : 'v option =
         let rec walk (p: Expr) (v: Expr) =
             match p, v with
             | Node { Annotations = annotations }, _ when annotations |> List.contains annot -> Some(cast v)
@@ -87,11 +88,12 @@ module private Extract =
 type ContractParameters(typeExpression) =
 
     let entryPoints =
-        let rec lookup (s: {| Locations: Map<string, EntryPoint>
-                              Path: Prim list |})
-                       (t: Expr)
-                       : {| Locations: Map<string, EntryPoint>
-                            Path: Prim list |} =
+        let rec lookup
+            (s: {| Locations: Map<string, EntryPoint>
+                   Path: Prim list |})
+            (t: Expr)
+            : {| Locations: Map<string, EntryPoint>
+                 Path: Prim list |} =
             match t with
             | NamedOr (node, name, (left, right)) ->
                 let updatedLocations =
@@ -143,9 +145,11 @@ type ContractParameters(typeExpression) =
             | { Prim = T_Pair; Args = Seq (args) }, _ ->
                 let (next, i) =
                     args
-                    |> Seq.fold (fun (v, acc) e ->
-                        let (r, next) = loop e v
-                        (next, r :: acc)) (v, [])
+                    |> Seq.fold
+                        (fun (v, acc) e ->
+                            let (r, next) = loop e v
+                            (next, r :: acc))
+                        (v, [])
 
                 let i = i |> Seq.toList |> List.rev
                 (Node(PrimExpression.Create(D_Pair, args = Seq i)), next)
@@ -154,9 +158,10 @@ type ContractParameters(typeExpression) =
               List elements ->
                 let children =
                     elements
-                    |> Seq.map (fun e ->
-                        let (exp, _) = loop listType e
-                        exp)
+                    |> Seq.map
+                        (fun e ->
+                            let (exp, _) = loop listType e
+                            exp)
                     |> Seq.toList
 
                 (Seq children, v)
@@ -180,15 +185,18 @@ type ContractParameters(typeExpression) =
             | { Prim = T_Bytes }, Value (String s) -> (BytesLiteral(Encoder.hexToBytes s), v)
             | { Prim = T_Nat }, Value (Int i) -> (IntLiteral i, v)
             | { Prim = T_Address }, Value (String s) ->
-                ((BytesLiteral
-                    (s
-                     |> TezosAddress.FromStringUnsafe
-                     |> TezosAddress.ToBytes)),
+                ((BytesLiteral(
+                    s
+                    |> TezosAddress.FromStringUnsafe
+                    |> TezosAddress.ToBytes
+                 )),
                  v)
             | { Prim = T_Address }, Value (Address addr) -> (BytesLiteral(addr |> TezosAddress.ToBytes), v)
             | { Prim = T_Signature }, Value (String s) ->
                 (BytesLiteral(s |> Signature.FromString |> Signature.ToBytes), v)
             | { Prim = T_Signature }, Value (Signature s) -> (BytesLiteral(s |> Signature.ToBytes), v)
+            | { Prim = T_Key }, Value (String s) -> (BytesLiteral(s |> PublicKey.FromString |> PublicKey.ForgeMicheline), v)
+            | { Prim = T_Key }, Value (Key s) -> (BytesLiteral(s |> PublicKey.ForgeMicheline), v)
             | { Prim = T_ChainId }, Value (String s) -> (BytesLiteral(ChainId.toBytes s), v)
             | _, _ -> failwith (sprintf "Bad parameters. \nPrim: %s \nParams:  %s" (prim.ToString()) (v.ToString()))
 

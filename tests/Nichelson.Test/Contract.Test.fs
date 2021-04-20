@@ -31,14 +31,14 @@ module ``Contract test`` =
         result |> should not' (equal null)
 
     [<Fact>]
-    let ``Should instantiate single parameter unamed`` () =
+    let ``Should instantiate single parameter unnamed`` () =
         let contract = ContractParameters "(nat %amount)"
 
         let expression =
             contract.Instantiate("%amount", IntArg 10I)
 
         expression
-        |> should equal (Expression.load ("10"))
+        |> should equal (Expression.load "10")
 
     [<Fact>]
     let ``Should instantiate single parameter named`` () =
@@ -49,7 +49,7 @@ module ``Contract test`` =
             contract.Instantiate(Rec([ ("%amount", IntArg 10I) ]))
 
         expression
-        |> should equal (Expression.load ("10"))
+        |> should equal (Expression.load "10")
 
     [<Fact>]
     let ``Should instantiate single pair with unnamed parameters`` () =
@@ -60,7 +60,7 @@ module ``Contract test`` =
             contract.Instantiate("%ep", Tuple [ IntArg 10I; StringArg "id" ])
 
         expression
-        |> should equal (Expression.load (@"Pair 10 ""id"""))
+        |> should equal (Expression.load @"Pair 10 ""id""")
 
     [<Fact>]
     let ``Should instantiate single pair with named parameters`` () =
@@ -74,7 +74,7 @@ module ``Contract test`` =
                        ("%id", StringArg "id") ])
 
         expression
-        |> should equal (Expression.load (@"Pair 10 ""id"""))
+        |> should equal (Expression.load @"Pair 10 ""id""")
 
     [<Fact>]
     let ``Should instantiate nested pair with named parameters`` () =
@@ -89,7 +89,7 @@ module ``Contract test`` =
 
 
         expression
-        |> should equal (Expression.load (@"(Left (Pair 10 ""id""))"))
+        |> should equal (Expression.load @"(Left (Pair 10 ""id""))")
 
     [<Fact>]
     let ``Should instantiate nested pair with unnamed parameters`` () =
@@ -103,7 +103,7 @@ module ``Contract test`` =
                          IntArg 30I ])
 
         expression
-        |> should equal (Expression.load (@"(Pair (Pair 10 ""id"") 30)"))
+        |> should equal (Expression.load @"(Pair (Pair 10 ""id"") 30)")
 
     [<Fact>]
     let ``Should instantiate signature`` () =
@@ -120,6 +120,21 @@ module ``Contract test`` =
                (Expression.load
                    "0x396cf2a25842bea1de3c28f5f5c551629511cea7b1eb63078b7f6a91709132a02e3b33bb7c7f9fe9ba821aa01c3589135fd9c479fc3a037e3b4c9cb9d45f8a03")
 
+    [<Fact>]
+    let ``Should instantiate key`` () =
+        let contract = ContractParameters "key"
+
+        let expression =
+            contract.Instantiate
+                (StringArg
+                    "edpkvQDbsaJwnY9pLCx1RWffGjNGVNrrPsoaCSAGosd6YVAjH157kV")
+
+        expression
+        |> should
+            equal
+               (Expression.load
+                   "0x00e7972279962c56095d2cca63ee5f07d71d8fcf2ffba5ece4bdbc241b1ec1a9ec")
+    
     [<Fact>]
     let ``Should instantiate chain_id`` () =
         let contract = ContractParameters "chain_id"
@@ -172,7 +187,7 @@ module ``Contract test`` =
             contract.Instantiate(List [ IntArg 10I; IntArg 20I ])
 
         let expected = Expression.load "{10;20}"
-        result |> should equal (expected)
+        result |> should equal expected
 
     [<Fact>]
     let ``Should instantiate bytes`` () =
@@ -182,7 +197,7 @@ module ``Contract test`` =
         let result = contract.Instantiate(BytesArg bytes)
 
         let expected = Expression.load "0xfffa"
-        result |> should equal (expected)
+        result |> should equal expected
 
     [<Fact>]
     let ``Should instantiate bytes from string`` () =
@@ -191,7 +206,7 @@ module ``Contract test`` =
         let result = contract.Instantiate(StringArg "0xff")
 
         let expected = Expression.load "0xff"
-        result |> should equal (expected)
+        result |> should equal expected
 
 
     [<Fact>]

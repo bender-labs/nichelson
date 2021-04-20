@@ -63,6 +63,8 @@ module Parameters =
 
     let private tSignature = noArg "signature" T_Signature
 
+    let private tKey = noArg "key" T_Key
+    
     let private tChainId = noArg "chain_id" T_ChainId
 
     let private tList =
@@ -82,6 +84,7 @@ module Parameters =
                  tAddress
                  tString
                  tSignature
+                 tKey
                  tChainId
                  tBytes
                  tUnit ]

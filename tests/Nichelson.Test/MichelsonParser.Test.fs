@@ -60,6 +60,13 @@ module ``Parser Test`` =
                 |> should equal (PrimExpression.Create T_Signature)
 
             [<Fact>]
+            let ``Should parse key`` () =
+                let expr = parse "key"
+
+                expr
+                |> should equal (PrimExpression.Create T_Key)
+            
+            [<Fact>]
             let ``Should parse chain_id`` () =
                 let expr = parse "chain_id"
 

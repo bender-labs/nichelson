@@ -45,7 +45,7 @@ module Expression =
             Node(parsePrim object f)
 
     let load (token: JToken) =
-        let rec parser: Func =
+        let rec parser : Func =
             fun token ->
                 match token with
                 | :? JObject as object -> parseObject object parser

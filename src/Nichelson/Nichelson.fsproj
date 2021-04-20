@@ -15,6 +15,7 @@
     <Compile Include="JsonParser.fs" />
     <Compile Include="TezosAddress.fs" />
     <Compile Include="Signature.fs" />
+    <Compile Include="PublicKey.fs" />
     <Compile Include="ChainId.fs" />
     <Compile Include="ContractParameters.fs" />
   </ItemGroup>

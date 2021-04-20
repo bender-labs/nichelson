@@ -9,6 +9,7 @@ type Prim =
     | T_String
     | T_Address
     | T_Signature
+    | T_Key
     | T_ChainId
     | T_Bytes
     | T_List
@@ -86,6 +87,7 @@ module Expr =
             | T_ChainId
             | T_Or
             | T_Bytes
+            | T_Key
             | T_Signature -> Some(v)
             | _ -> None
         | _ -> None
