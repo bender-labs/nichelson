@@ -1,6 +1,7 @@
 open Argu
 #load ".fake/build.fsx/intellisense.fsx"
 #if !FAKE
+#r "Facades/netstandard"
 #r "netstandard"
 #endif
 open System
@@ -18,8 +19,7 @@ open Fantomas
 open Fantomas.Extras.FakeHelpers
 
 BuildServer.install [
-    AppVeyor.Installer
-    Travis.Installer
+    GitHubActions.Installer
 ]
 
 let environVarAsBoolOrDefault varName defaultValue =
@@ -85,7 +85,6 @@ let mutable changelogBackupFilename = ""
 
 let publishUrl = "https://www.nuget.org"
 
-let docsSiteBaseUrl = sprintf "https://%s.github.io/%s" gitOwner gitRepoName
 
 let disableCodeCoverage = environVarAsBoolOrDefault "DISABLE_COVERAGE" false
 

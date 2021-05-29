@@ -23,12 +23,12 @@ group Build
     nuget Fake.Tools.Git 5.20.4
     nuget Fake.DotNet.Paket 5.20.4
     nuget Fake.Api.GitHub 5.20.4
-    nuget Fake.BuildServer.AppVeyor 5.20.4
-    nuget Fake.BuildServer.Travis 5.20.4
+    nuget Fake.BuildServer.GitHubActions 5.20.4
     nuget Argu
     nuget Fantomas.Extras
+    nuget Octokit 0.48
     
 group Analyzers
   source https://www.nuget.org/api/v2
   source https://api.nuget.org/v3/index.json
-  nuget BinaryDefense.FSharp.Analyzers.Hashing 0.2.1
+  nuget BinaryDefense.FSharp.Analyzers.Hashing 0.2.2
